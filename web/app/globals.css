@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #16181d;
+  --color-body: #55596b;
+  --color-bg-soft: #f6f5f8;
+  /* accent/teal are tuned so white text on them clears WCAG AA (4.5:1);
+     the lighter originals sat at 3.7 and 4.2. */
+  --color-accent: #806da5;
+  --color-accent-dark: #6f5c93;
+  --color-teal: #1e847d;
+  --color-teal-dark: #166860;
+  --color-line: #e6e4ec;
+  --color-warn: #b3492f;
+
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+}
+
+body {
+  background-color: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* ---- Motion -------------------------------------------------------------
+   Two building blocks: `fade-up` for entrances (hero on load, sections on
+   scroll) and `fade-in` for content that swaps in place. Delays are applied
+   inline via --delay so a group can stagger without a class per step. */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* Scroll-triggered reveal. Starts hidden, and the Reveal component flips
+   data-visible once the section enters the viewport. */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--delay, 0ms);
+}
+
+.reveal[data-visible='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  /* Entrances must not leave content stuck at their hidden start state. */
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
