@@ -1,5 +1,40 @@
 # Deploying for free
 
+## Live deployment
+
+| | |
+|---|---|
+| Website | https://yukti-web.onrender.com |
+| API | https://yukti-api-3hdc.onrender.com/api |
+| Database | Supabase project `kojrjxjdndusvgnweqak` (ap-southeast-2) |
+
+Verified with `API_URL=https://yukti-api-3hdc.onrender.com/api npm run test:api` — 84/84.
+
+Note the API's hostname carries a `-3hdc` suffix: Render appends one when the
+service name is already taken globally, so read the real URL off the dashboard
+rather than assuming `<name>.onrender.com`.
+
+### Custom domain — do not break email
+
+`yuktisolutions.co.in` is registered through Google/Squarespace and **runs Google
+Workspace email**:
+
+```
+MX  -> smtp.google.com
+TXT -> v=spf1 include:_spf.google.com ~all
+```
+
+Only the web records change. Leaving MX or that SPF record out when editing DNS
+takes company email down with it.
+
+| Type | Host | Value |
+|---|---|---|
+| A | `@` | `216.24.57.1` (replaces the four Squarespace A records) |
+| CNAME | `www` | `yukti-web.onrender.com` |
+
+Render issues the TLS certificate automatically once the records resolve.
+
+
 The platform is three pieces. Only two of them need a host:
 
 | Piece | Where | Why |
