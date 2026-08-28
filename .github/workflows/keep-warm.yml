@@ -1,0 +1,76 @@
+# Keeps the Render services warm during working hours.
+#
+# Render's free instances sleep after 15 minutes idle and then take 30-50s to
+# answer the next request. A request every 14 minutes keeps them awake.
+#
+# WHY NOT 24/7 --------------------------------------------------------------
+# Two limits make round-the-clock pinging counterproductive:
+#
+#   1. Render gives 750 free instance-hours per month, for the whole workspace.
+#      A month is ~730 hours, so keeping BOTH services awake all the time costs
+#      ~1460 hours - roughly double the allowance. It would run out mid-month
+#      and, with no card on file, the services would simply stop.
+#
+#   2. GitHub Actions gives 2000 free minutes/month on a private repo, and bills
+#      every run as at least a whole minute. Pinging all day is ~3600 runs.
+#
+# An 11-hour window costs ~669 instance-hours and ~1672 Actions minutes, so both
+# stay inside the free tier with room to spare. Outside the window the site
+# still works - the first visitor just waits for the cold start.
+#
+# Adjust the window by editing the hour range in the cron below, but re-check
+# the arithmetic first: hours/day x 2 services x 30.4 must stay under 750.
+
+name: Keep services warm
+
+on:
+  schedule:
+    # Times are UTC. 04:00-14:59 UTC = 09:30-20:29 IST, i.e. the working day.
+    # `*/14` fires at :00 :14 :28 :42 :56 - five pings an hour, so the longest
+    # gap is 14 minutes and the services never reach the 15-minute idle cutoff.
+    - cron: '*/14 4-14 * * *'
+  # Lets you trigger a wake-up by hand, e.g. just before a demo.
+  workflow_dispatch:
+
+# If a previous ping is somehow still running, drop it rather than stacking up.
+concurrency:
+  group: keep-warm
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping web and API
+        run: |
+          set -uo pipefail
+
+          WEB="https://yuktisolutions.co.in"
+          API="https://yukti-api-3hdc.onrender.com/api/health"
+          failed=0
+
+          # --max-time is generous on purpose: if the service HAS gone cold this
+          # request is the one paying the 30-50s wake-up cost, and timing out
+          # here would report a false outage.
+          ping_url() {
+            local name="$1" url="$2"
+            local code
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 90 "$url" || echo "000")
+            if [ "$code" = "200" ]; then
+              echo "  OK    $name ($code)"
+            else
+              echo "  FAIL  $name ($code)"
+              return 1
+            fi
+          }
+
+          echo "Pinging at $(date -u '+%Y-%m-%d %H:%M UTC')"
+          ping_url "web" "$WEB" || failed=1
+          ping_url "api" "$API" || failed=1
+
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::A service did not return 200 - it may be down, not merely cold."
+            exit 1
+          fi
+          echo "Both services responded."

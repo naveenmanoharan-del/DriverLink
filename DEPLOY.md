@@ -14,6 +14,36 @@ Note the API's hostname carries a `-3hdc` suffix: Render appends one when the
 service name is already taken globally, so read the real URL off the dashboard
 rather than assuming `<name>.onrender.com`.
 
+### Cold starts and the keep-warm job
+
+Free Render instances sleep after 15 minutes idle and take 30–50s to answer the
+next request. `.github/workflows/keep-warm.yml` pings both services every 14
+minutes to prevent that — but only for an 11-hour daily window, because two
+separate free-tier limits make 24/7 pinging self-defeating:
+
+| Limit | Allowance | Cost of pinging 24/7 |
+|---|---|---|
+| Render instance-hours (whole workspace) | 750/month | ~1460 — runs out mid-month |
+| GitHub Actions minutes (private repo) | 2000/month | ~3648 — each run bills ≥1 minute |
+
+An 11-hour window costs ~669 instance-hours and ~1672 Actions minutes, so both
+fit with headroom. Outside the window the site still works; the first visitor
+just pays the cold start. `workflow_dispatch` lets you warm it manually before a
+demo.
+
+**Before widening the window, redo the arithmetic:** `hours/day × 2 services ×
+30.4` must stay under 750, and `5 × hours/day × 30.4` under 2000.
+
+Two caveats worth knowing:
+
+- GitHub delays scheduled workflows under load, so a ping can land late and a
+  service may occasionally sleep anyway. It is best-effort, not a guarantee.
+- GitHub disables scheduled workflows in a repository with no commits for 60
+  days. If pings stop, that is the first thing to check.
+
+The job also doubles as uptime monitoring: it fails, and notifies you, when a
+service returns anything other than 200.
+
 ### Custom domain — do not break email
 
 `yuktisolutions.co.in` is registered through Google/Squarespace and **runs Google
