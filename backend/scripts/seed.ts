@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from '../src/database/schema';
+import { sslFor } from '../src/database/ssl';
 
 const CATEGORY_SEED: { name: string; group: (typeof schema.categoryGroup.enumValues)[number]; description: string }[] = [
   { name: 'General Labourer', group: 'physical_labour', description: 'General manual work, no specific trade' },
@@ -35,7 +36,10 @@ const CATEGORY_SEED: { name: string; group: (typeof schema.categoryGroup.enumVal
 ];
 
 async function main() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) throw new Error('DATABASE_URL is not set');
+  // Same TLS rules as the app, so seeding a hosted database works too.
+  const pool = new Pool({ connectionString, ...sslFor(connectionString) });
   const db = drizzle(pool, { schema });
 
   for (const category of CATEGORY_SEED) {
