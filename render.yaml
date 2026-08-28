@@ -31,6 +31,10 @@ services:
       # pooler on 6543 breaks migrations.
       - key: DATABASE_URL
         sync: false
+      # Supabase serves databases from its own CA, which isn't in Node's trust
+      # store. Pointing at the bundled copy keeps certificate verification on.
+      - key: DATABASE_CA_CERT_FILE
+        value: certs/supabase-prod-ca-2021.crt
       # Render generates these once and keeps them stable across deploys.
       - key: JWT_ACCESS_SECRET
         generateValue: true

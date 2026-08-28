@@ -21,11 +21,19 @@ neither can host this app.
 ## 1. Supabase — the database
 
 1. Create a project. Save the database password it shows you (it is not shown again).
-2. **Connect** → copy the **Session pooler** / direct connection URI (port **5432**).
+2. **Connect** → **Direct connection** tab → choose **Session pooler** (port **5432**).
 
-   Do **not** use the transaction pooler on port 6543. It runs pgBouncer in
-   transaction mode, which breaks DDL and prepared statements, so
-   `npm run db:migrate` fails against it.
+   Three traps here, all of which were hit while setting this up:
+
+   - **Not the transaction pooler (port 6543).** It runs pgBouncer in
+     transaction mode, which breaks DDL and prepared statements, so
+     `npm run db:migrate` fails against it.
+   - **Not "Direct connection" either, on most hosts.** It is IPv6-only unless
+     you buy the IPv4 add-on, and Render's free tier is IPv4. The session
+     pooler is IPv4 and still session-mode, so migrations work.
+   - **Do not append `?sslmode=require`.** Current `pg` treats `require` as an
+     alias for `verify-full` and lets it override the TLS options the app
+     builds, which breaks the connection. TLS is enabled automatically.
 
 3. Create the tables. From `backend/`, with that URI:
 
@@ -37,8 +45,17 @@ neither can host this app.
    The seed matters: without categories, registration and job posting have
    nothing to select and both forms are unusable.
 
-TLS is enabled automatically for any non-localhost database host, so no code
-change is needed.
+TLS is enabled automatically for any non-localhost host, and **certificate
+verification stays on**. Supabase serves databases from its own CA, which isn't
+in Node's trust store, so the bundled copy is used:
+
+```
+DATABASE_CA_CERT_FILE=certs/supabase-prod-ca-2021.crt
+```
+
+Set that alongside `DATABASE_URL` wherever the API runs. Without it you'd get
+`self-signed certificate in certificate chain` — the fix is to supply the CA,
+not to disable verification.
 
 ## 2. Render — API and website
 
