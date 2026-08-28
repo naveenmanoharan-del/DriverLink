@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Module, type MiddlewareConsumer, type NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { DatabaseModule } from './database/database.module';
@@ -40,4 +41,12 @@ import { AppService } from './app.service';
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Off by default: behind a proxy the access log usually lives there, and
+    // an extra line per request is noise. Set REQUEST_LOGGING=true to enable.
+    if (process.env.REQUEST_LOGGING === 'true') {
+      consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+    }
+  }
+}

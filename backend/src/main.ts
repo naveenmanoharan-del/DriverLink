@@ -21,8 +21,16 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+  // CORS_ORIGIN is documented as a comma-separated list, so split it rather
+  // than handing the raw string to cors() — "a.com,b.com" is not a valid origin
+  // and would silently reject both. Unset means reflect any origin, which is
+  // fine locally but should be pinned to the real web origin in production.
+  const corsOrigin = process.env.CORS_ORIGIN?.trim();
   app.enableCors({
-    origin: process.env.CORS_ORIGIN ?? true,
+    origin:
+      !corsOrigin || corsOrigin === '*'
+        ? true
+        : corsOrigin.split(',').map((o) => o.trim()).filter(Boolean),
     credentials: true,
   });
   const port = process.env.PORT ?? 3000;
