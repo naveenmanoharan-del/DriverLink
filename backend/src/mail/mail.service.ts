@@ -13,6 +13,8 @@ export interface MailAttachment {
  * Sending is best-effort: a mail failure is logged, never thrown, so an outage
  * at the mail provider can't stop someone from registering.
  */
+const DEFAULT_ADMIN_EMAIL = 'naveenmanoharan@yuktisolutions.co.in';
+
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
@@ -26,7 +28,9 @@ export class MailService {
     attachments: MailAttachment[] = [],
   ) {
     const apiKey = this.config.get<string>('RESEND_API_KEY');
-    const to = (this.config.get<string>('ADMIN_NOTIFY_EMAIL') ?? '')
+    const to = (
+      this.config.get<string>('ADMIN_NOTIFY_EMAIL') ?? DEFAULT_ADMIN_EMAIL
+    )
       .split(',')
       .map((a) => a.trim())
       .filter(Boolean);
