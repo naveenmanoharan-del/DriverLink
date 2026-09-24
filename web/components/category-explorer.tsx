@@ -4,24 +4,25 @@ import { useState } from 'react';
 
 const CATEGORIES = [
   {
-    label: 'Physical labour',
-    image: 'https://images.unsplash.com/photo-1558227691-41ea78d1f631?w=1000&q=80',
-    description: 'Loaders, cleaners, security guards and general site helpers — booked by the day, verified before they arrive.',
+    label: 'Key personnel',
+    image: 'https://images.unsplash.com/photo-1694521787193-9293daeddbaa?w=1000&q=80',
+    description:
+      'Team leaders, resident engineers, and bridge, track, highway, geotechnical, S&T, OHE, contracts and QA experts named in your technical proposal.',
   },
   {
-    label: 'Drivers',
-    image: 'https://images.unsplash.com/photo-1612630741022-b29ec17d013d?w=1000&q=80',
-    description: 'Car, truck, heavy vehicle and delivery riders, licensed and rated by the clients who’ve booked them before.',
+    label: 'Engineers & technical staff',
+    image: 'https://images.unsplash.com/photo-1545186070-de624ed19875?w=1000&q=80',
+    description: 'Site engineers, section engineers and inspectors, surveyors, lab technicians and CAD draughtsmen.',
   },
   {
-    label: 'Artisans',
-    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1000&q=80',
-    description: 'Electricians, plumbers, carpenters and welders — set their own day-rate, apply to the jobs that fit.',
-  },
-  {
-    label: 'Office staff',
+    label: 'Office & support staff',
     image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1000&q=80',
-    description: 'Data entry, reception, accounts and admin support, available on short notice or ongoing contract.',
+    description: 'Office managers, accountants, document controllers, HR, computer operators and stenographers for the project office.',
+  },
+  {
+    label: 'Retired railway officers',
+    image: 'https://images.unsplash.com/photo-1637995735729-c43250f1ef47?w=1000&q=80',
+    description: 'Officers and SSEs / JEs retired from Indian Railways, RVNL, IRCON, RITES and DFCCIL — decades of field experience, available for consultancy roles.',
   },
 ];
 

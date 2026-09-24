@@ -8,11 +8,9 @@ import '../../widgets/app_button.dart';
 import 'job_detail_screen.dart';
 
 const Map<String, String> _groupLabels = {
-  'physical_labour': 'Physical labour',
-  'driver': 'Drivers',
-  'artisan': 'Artisans',
-  'office_staff': 'Office staff',
-  'other': 'Other',
+  'key_personnel': 'Key personnel',
+  'technical_staff': 'Engineers & technical staff',
+  'support_staff': 'Office & support staff',
 };
 
 class NewJobScreen extends StatefulWidget {
@@ -31,7 +29,7 @@ class _NewJobScreenState extends State<NewJobScreen> {
   final _location = TextEditingController();
   final _workersRequired = TextEditingController(text: '1');
   final _offeredRate = TextEditingController();
-  String _rateUnit = 'day';
+  String _rateUnit = 'month';
   String? _categoryId;
   DateTime? _startsAt;
 
@@ -253,12 +251,13 @@ class _NewJobScreenState extends State<NewJobScreen> {
                         value: _rateUnit,
                         decoration: const InputDecoration(labelText: 'Per'),
                         items: const [
+                          DropdownMenuItem(value: 'month', child: Text('Month')),
                           DropdownMenuItem(value: 'hour', child: Text('Hour')),
                           DropdownMenuItem(value: 'day', child: Text('Day')),
                           DropdownMenuItem(value: 'job', child: Text('Job')),
                         ],
                         onChanged:
-                            (v) => setState(() => _rateUnit = v ?? 'day'),
+                            (v) => setState(() => _rateUnit = v ?? 'month'),
                       ),
                     ),
                   ],

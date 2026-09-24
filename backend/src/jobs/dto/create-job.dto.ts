@@ -20,7 +20,8 @@ export class CreateJobDto {
   @IsOptional() @Type(() => Number) longitude?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) workersRequired?: number;
   @IsNumberString() offeredRate!: string;
-  @IsOptional() @IsIn(['hour', 'day', 'job']) rateUnit?: 'hour' | 'day' | 'job';
+  @IsOptional() @IsIn(['hour', 'day', 'job', 'month']) rateUnit?:
+    'hour' | 'day' | 'job' | 'month';
   @IsDateString() startsAt!: string;
   @IsOptional() @IsDateString() endsAt?: string;
 }

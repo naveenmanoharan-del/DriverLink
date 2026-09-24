@@ -10,8 +10,8 @@ export default function HomePage() {
       <section className="relative mt-6 h-[560px] w-full overflow-hidden sm:h-[620px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&q=80"
-          alt="Construction workers on site"
+          src="https://images.unsplash.com/photo-1582217900003-2b19c0e3a7d0?w=1920&q=80"
+          alt="A train on a railway line"
           // Slow drift keeps the hero alive without competing with the copy.
           className="h-full w-full animate-fade-in object-cover motion-safe:animate-[fade-in_1.2s_ease-out_both]"
         />
@@ -20,30 +20,31 @@ export default function HomePage() {
           <div className="mx-auto max-w-5xl">
             {/* Staggered entrance: label, headline, body, then the actions. */}
             <p className="animate-fade-up text-sm text-white" style={{ '--delay': '120ms' } as React.CSSProperties}>
-              Manpower, on record
+              Railway &amp; highway consultancy staffing
             </p>
             <h1
               className="mt-3 max-w-2xl animate-fade-up text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl"
               style={{ '--delay': '220ms' } as React.CSSProperties}
             >
-              Every worker, verified and on the books.
+              The right key personnel for every bid.
             </h1>
             <p
               className="mt-4 max-w-lg animate-fade-up text-[15px] leading-relaxed text-white"
               style={{ '--delay': '340ms' } as React.CSSProperties}
             >
-              Yukti Solutions connects businesses and households with verified workers — labour, drivers,
-              artisans, office staff — with an ID, a day-rate, and a verification stamp behind every name.
+              Yukti Solutions supplies experts, engineers and office staff to firms bidding on railway GC, PMC,
+              PGMS and PSSA contracts and highway Authority / Independent Engineer assignments — including
+              experienced retired railway officers.
             </p>
             <div
               className="mt-8 flex animate-fade-up flex-wrap gap-4"
               style={{ '--delay': '460ms' } as React.CSSProperties}
             >
-              <Link href="/register/client">
-                <Button variant="onDark">Hire a worker</Button>
-              </Link>
               <Link href="/register/worker">
-                <Button variant="onDarkOutline">Find work</Button>
+                <Button variant="onDark">Submit your CV</Button>
+              </Link>
+              <Link href="/register/client">
+                <Button variant="onDarkOutline">Hire for a contract</Button>
               </Link>
             </div>
           </div>
@@ -56,22 +57,24 @@ export default function HomePage() {
           <Reveal>
             <Eyebrow>About us</Eyebrow>
             <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl">
-              Welcome to Yukti Solutions, a manpower partner built for accountability.
+              CVs that meet the RFP, from people who have done the work.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-body">
-              We supply verified labour, drivers, artisans and office staff for businesses and households —
-              every worker carries an ID, a day-rate, and a track record clients can see before they hire.
+              Consultancy bids are won and lost on key personnel. We maintain a register of team leaders,
+              resident engineers, bridge, track, S&amp;T and OHE experts, and the site-office staff behind them —
+              serving and retired professionals from Indian Railways, railway PSUs, NHAI, state PWDs and the
+              private sector — with CVs ready to go into your technical proposal.
             </p>
             <Link href="/register/client" className="mt-6 inline-block">
-              <Button>About hiring with us</Button>
+              <Button>Source personnel for a bid</Button>
             </Link>
           </Reveal>
           <Reveal delay={140}>
             <div className="group aspect-[4/3] overflow-hidden rounded-3xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1516216628859-9bccecab13ca?w=1000&q=80"
-                alt="Workers on a construction site"
+                src="https://images.unsplash.com/photo-1501276276428-88ec0b385919?w=1000&q=80"
+                alt="Aerial view of a highway through trees"
                 className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               />
             </div>
@@ -88,16 +91,16 @@ export default function HomePage() {
           <div className="mt-10 grid gap-8 sm:grid-cols-3">
             {[
               {
-                title: 'Verified, not just listed',
-                body: 'Every worker profile carries a verification status clients can check before they book.',
+                title: 'Bid-ready CVs',
+                body: 'Qualifications, experience and last postings captured up front, so matching a CV to the RFP criteria is quick.',
               },
               {
-                title: 'Set your own rate',
-                body: 'Workers post a day, hour or job rate up front — no back-and-forth negotiating on-site.',
+                title: 'Retired railway expertise',
+                body: 'Officers and SSEs retired from Indian Railways and its PSUs bring decades of P-Way, bridge, S&T and OHE experience.',
               },
               {
-                title: 'No agency middleman',
-                body: 'Clients post a job, workers apply directly, and the client picks who shows up.',
+                title: 'Railways and highways',
+                body: 'One register covering railway GC / PMC / PGMS / PSSA work and highway AE / IE consultancy.',
               },
             ].map((v, i) => (
               // Stagger left-to-right so the row resolves as one gesture.
@@ -115,7 +118,7 @@ export default function HomePage() {
         <Reveal>
           <Eyebrow>Who&apos;s on the register</Eyebrow>
           <h2 className="mt-4 max-w-lg text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl">
-            Every category of work, one platform.
+            From team leader to site office.
           </h2>
         </Reveal>
         <Reveal delay={120} className="mt-10">
@@ -127,19 +130,21 @@ export default function HomePage() {
       <section className="mx-auto max-w-5xl px-4 pb-24">
         <Reveal className="grid gap-px overflow-hidden rounded-3xl border border-line bg-line sm:grid-cols-2">
           <div className="bg-accent p-10 text-white">
-            <p className="text-sm text-white">For clients</p>
-            <h3 className="mt-2 text-2xl font-bold">Post a job, see who&apos;s available</h3>
-            <p className="mt-3 text-[15px] text-white">List the trade, the rate and the start date. Verified workers apply.</p>
+            <p className="text-sm text-white">For consultancy firms</p>
+            <h3 className="mt-2 text-2xl font-bold">Tell us the positions in your bid</h3>
+            <p className="mt-3 text-[15px] text-white">
+              Post the role, location and remuneration. We put forward candidates who fit the RFP.
+            </p>
             <Link href="/register/client" className="mt-6 inline-block">
-              <Button variant="onAccentPanel">Hire a worker</Button>
+              <Button variant="onAccentPanel">Hire for a contract</Button>
             </Link>
           </div>
           <div className="bg-teal p-10 text-white">
-            <p className="text-sm text-white">For workers</p>
-            <h3 className="mt-2 text-2xl font-bold">Set your rate, get booked</h3>
-            <p className="mt-3 text-[15px] text-white">Build a profile once and apply to jobs near you.</p>
+            <p className="text-sm text-white">For professionals</p>
+            <h3 className="mt-2 text-2xl font-bold">Retired or serving, put your experience to work</h3>
+            <p className="mt-3 text-[15px] text-white">Register once, upload your CV, and we&apos;ll contact you when a contract fits.</p>
             <Link href="/register/worker" className="mt-6 inline-block">
-              <Button variant="onTealPanel">Find work</Button>
+              <Button variant="onTealPanel">Submit your CV</Button>
             </Link>
           </div>
         </Reveal>

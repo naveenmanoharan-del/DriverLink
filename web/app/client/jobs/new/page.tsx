@@ -5,16 +5,8 @@ import { useRouter } from 'next/navigation';
 import { RequireRole } from '@/components/require-role';
 import { useAuth } from '@/lib/auth-context';
 import { apiFetch } from '@/lib/api';
-import type { Category, Job, RateUnit } from '@/lib/types';
+import { GROUP_LABELS, type Category, type Job, type RateUnit } from '@/lib/types';
 import { Button, Card, Eyebrow, Field, Select, Textarea, TextInput } from '@/components/ui';
-
-const GROUP_LABELS: Record<string, string> = {
-  physical_labour: 'Physical labour',
-  driver: 'Drivers',
-  artisan: 'Artisans',
-  office_staff: 'Office staff',
-  other: 'Other',
-};
 
 export default function NewJobPage() {
   return (
@@ -38,7 +30,7 @@ function NewJobForm() {
     location: '',
     workersRequired: '1',
     offeredRate: '',
-    rateUnit: 'day' as RateUnit,
+    rateUnit: 'month' as RateUnit,
     startsAt: '',
   });
 
@@ -94,7 +86,7 @@ function NewJobForm() {
             <TextInput required value={form.title} onChange={(e) => update('title', e.target.value)} />
           </Field>
 
-          <Field label="Category">
+          <Field label="Position">
             <Select required value={form.categoryId} onChange={(e) => update('categoryId', e.target.value)}>
               <option value="" disabled>
                 Select a category
@@ -120,7 +112,7 @@ function NewJobForm() {
           </Field>
 
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Workers required">
+            <Field label="Positions required">
               <TextInput
                 type="number"
                 min={1}
@@ -150,8 +142,9 @@ function NewJobForm() {
             </Field>
             <Field label="Per">
               <Select value={form.rateUnit} onChange={(e) => update('rateUnit', e.target.value as RateUnit)}>
-                <option value="hour">Hour</option>
+                <option value="month">Month</option>
                 <option value="day">Day</option>
+                <option value="hour">Hour</option>
                 <option value="job">Job</option>
               </Select>
             </Field>

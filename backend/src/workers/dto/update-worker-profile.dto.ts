@@ -7,9 +7,12 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Max,
   Min,
   MaxLength,
+  ArrayUnique,
 } from 'class-validator';
+import { BACKGROUNDS, SECTORS } from '../../auth/dto/register-worker.dto';
 
 export class UpdateWorkerProfileDto {
   @IsOptional() @IsString() @MaxLength(100) firstName?: string;
@@ -21,6 +24,22 @@ export class UpdateWorkerProfileDto {
   @IsOptional() @IsIn(['offline', 'available', 'engaged']) availability?:
     'offline' | 'available' | 'engaged';
   @IsOptional() @IsNumberString() minRate?: string;
-  @IsOptional() @IsIn(['hour', 'day', 'job']) rateUnit?: 'hour' | 'day' | 'job';
+  @IsOptional() @IsIn(['hour', 'day', 'job', 'month']) rateUnit?:
+    'hour' | 'day' | 'job' | 'month';
   @IsOptional() @IsString() @MaxLength(100) city?: string;
+  @IsOptional() @IsIn(BACKGROUNDS) background?: (typeof BACKGROUNDS)[number];
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsIn(SECTORS, { each: true })
+  sectors?: string[];
+  @IsOptional() @IsString() @MaxLength(255) qualification?: string;
+  @IsOptional() @IsString() @MaxLength(255) lastDesignation?: string;
+  @IsOptional() @IsString() @MaxLength(255) lastOrganisation?: string;
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1970)
+  @Max(2100)
+  retirementYear?: number;
 }

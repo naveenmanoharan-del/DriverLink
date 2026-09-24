@@ -14,10 +14,11 @@ export default function RegisterClientPage() {
 
   const [form, setForm] = useState({
     phone: '',
+    email: '',
     password: '',
     name: '',
     companyName: '',
-    clientType: 'individual' as 'individual' | 'company',
+    clientType: 'company' as 'individual' | 'company',
     city: '',
   });
 
@@ -32,6 +33,7 @@ export default function RegisterClientPage() {
     try {
       await registerClient({
         phone: form.phone,
+        email: form.email,
         password: form.password,
         name: form.name,
         companyName: form.companyName || undefined,
@@ -50,7 +52,7 @@ export default function RegisterClientPage() {
     <div className="mx-auto max-w-md px-4 py-12">
       <Eyebrow>Join the register</Eyebrow>
       <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">Register as a client</h1>
-      <p className="mt-1 text-sm text-body">Post jobs and hire verified workers.</p>
+      <p className="mt-1 text-sm text-body">Source key personnel and office staff for railway and highway contracts.</p>
 
       <Card className="mt-6 p-6">
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -63,8 +65,8 @@ export default function RegisterClientPage() {
               value={form.clientType}
               onChange={(e) => update('clientType', e.target.value as 'individual' | 'company')}
             >
-              <option value="individual">Individual / household</option>
-              <option value="company">Company</option>
+              <option value="company">Company / consultancy firm</option>
+              <option value="individual">Individual</option>
             </Select>
           </Field>
 
@@ -82,6 +84,10 @@ export default function RegisterClientPage() {
               value={form.phone}
               onChange={(e) => update('phone', e.target.value)}
             />
+          </Field>
+
+          <Field label="Email">
+            <TextInput type="email" required value={form.email} onChange={(e) => update('email', e.target.value)} />
           </Field>
 
           <Field label="Password">

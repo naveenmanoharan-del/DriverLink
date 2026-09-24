@@ -14,6 +14,26 @@ Note the API's hostname carries a `-3hdc` suffix: Render appends one when the
 service name is already taken globally, so read the real URL off the dashboard
 rather than assuming `<name>.onrender.com`.
 
+### Migrations run on every deploy
+
+`npm run start:prod` runs `dist/src/database/migrate.js` before the API
+starts: it applies any pending `drizzle/` migrations and re-seeds the category
+list from `src/database/categories.seed.ts`. Categories not in that file are
+deactivated (hidden from forms, kept for old profiles). To change the roles on
+offer, edit that file and deploy — nothing needs running by hand.
+
+### Email notifications
+
+Every new account (candidate or client) and every resume upload emails
+`ADMIN_NOTIFY_EMAIL`, with the resume attached. Sending goes through Resend's
+HTTP API because Render's free plan blocks outbound SMTP. Set
+`RESEND_API_KEY` on `yukti-api`. If it is missing, registration still works and
+the API logs `Email not configured`.
+
+Resumes are stored in Postgres (`resumes` table, 5 MB cap, PDF/DOC/DOCX checked
+by file signature). Supabase's free database is 500 MB, which is roughly a few
+thousand CVs; move them to object storage before that becomes tight.
+
 ### Cold starts and the keep-warm job
 
 Free Render instances sleep after 15 minutes idle and take 30–50s to answer the
@@ -43,6 +63,12 @@ Two caveats worth knowing:
 
 The job also doubles as uptime monitoring: it fails, and notifies you, when a
 service returns anything other than 200.
+
+`/api/health` runs `select 1` against the database. That matters twice over:
+a check that only proves the Node process is up stayed green while every real
+request was failing, and Supabase's free tier **pauses a project after a week
+without database activity** — the likely cause of the API returning 500s in September
+2026. The keep-warm pings now count as that activity.
 
 ### Custom domain — do not break email
 

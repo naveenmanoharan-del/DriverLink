@@ -36,15 +36,23 @@ function buildRequest(path: string, options: ApiFetchOptions, token?: string) {
   // drop it from the spread rather than letting it reach fetch().
   const { body, headers, ...rest } = options;
   delete (rest as { token?: string }).token;
+  // FormData (file uploads) goes as-is: the browser must set the multipart
+  // Content-Type itself, since it carries the boundary.
+  const isForm = body instanceof FormData;
   return fetch(`${API_URL}${path}`, {
     ...rest,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isForm ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: isForm ? body : body !== undefined ? JSON.stringify(body) : undefined,
   });
+}
+
+/** Absolute URL of an API path, for links the browser fetches itself. */
+export function apiUrl(path: string) {
+  return `${API_URL}${path}`;
 }
 
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {

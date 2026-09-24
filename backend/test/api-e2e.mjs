@@ -75,8 +75,9 @@ async function run() {
   check('categories seeded (>0)', Array.isArray(cats.data) && cats.data.length > 0, `got ${cats.data?.length}`);
   const groups = [...new Set((cats.data || []).map((c) => c.group))];
   check(
-    'all 4 labour groups present',
-    ['physical_labour', 'driver', 'artisan', 'office_staff'].every((g) => groups.includes(g)),
+    'exactly the 3 consultancy groups are active',
+    groups.length === 3 &&
+      ['key_personnel', 'technical_staff', 'support_staff'].every((g) => groups.includes(g)),
     `groups: ${groups.join(',')}`,
   );
   state.categoryId = cats.data[0].id;

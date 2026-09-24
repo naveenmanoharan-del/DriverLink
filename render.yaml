@@ -50,6 +50,18 @@ services:
       # browser's Origin header — so this is set by hand after the first deploy.
       - key: CORS_ORIGIN
         sync: false
+      # Emails the owner on every sign-up and resume upload, via Resend's HTTP
+      # API (Render's free plan blocks outbound SMTP, so Gmail SMTP won't work).
+      # Create the key at resend.com -> API Keys.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: ADMIN_NOTIFY_EMAIL
+        value: naveenmanoharan@yuktisolutions.co.in
+      # Until yuktisolutions.co.in is verified in Resend, only the default
+      # onboarding@resend.dev sender works, and it can only deliver to the
+      # address the Resend account was created with.
+      - key: MAIL_FROM
+        value: Yukti Solutions <onboarding@resend.dev>
       - key: REQUEST_LOGGING
         value: "false"
       - key: RATE_LIMIT_TTL_MS

@@ -18,6 +18,9 @@
 # stay inside the free tier with room to spare. Outside the window the site
 # still works - the first visitor just waits for the cold start.
 #
+# The API ping hits /api/health, which queries the database. That also keeps
+# the Supabase free-tier project from pausing after a week without queries.
+#
 # Adjust the window by editing the hour range in the cron below, but re-check
 # the arithmetic first: hours/day x 2 services x 30.4 must stay under 750.
 

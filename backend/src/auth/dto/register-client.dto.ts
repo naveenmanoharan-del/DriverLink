@@ -1,4 +1,5 @@
 import {
+  IsEmail,
   IsIn,
   IsOptional,
   IsString,
@@ -20,6 +21,11 @@ export class RegisterClientDto {
   @IsString()
   @MaxLength(150)
   name!: string;
+
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(255)
+  email?: string;
 
   @IsOptional()
   @IsString()

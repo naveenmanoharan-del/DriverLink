@@ -1,5 +1,6 @@
 import {
   boolean,
+  customType,
   decimal,
   integer,
   jsonb,
@@ -13,19 +14,31 @@ import {
 } from 'drizzle-orm/pg-core';
 
 export const userRole = pgEnum('user_role', ['worker', 'client', 'admin']);
+// The first five groups are from the original general-labour taxonomy. They
+// stay in the enum because existing rows may reference them, but the seed now
+// deactivates every category in them — the platform recruits only for railway
+// and highway consultancy contracts (GC, PMC, PGMS, PSSA, AE/IE).
 export const categoryGroup = pgEnum('category_group', [
   'physical_labour',
   'driver',
   'artisan',
   'office_staff',
   'other',
+  'key_personnel',
+  'technical_staff',
+  'support_staff',
+]);
+export const workerBackground = pgEnum('worker_background', [
+  'retired_railway',
+  'retired_govt',
+  'private_sector',
 ]);
 export const workerAvailability = pgEnum('worker_availability', [
   'offline',
   'available',
   'engaged',
 ]);
-export const rateUnit = pgEnum('rate_unit', ['hour', 'day', 'job']);
+export const rateUnit = pgEnum('rate_unit', ['hour', 'day', 'job', 'month']);
 export const verificationStatus = pgEnum('verification_status', [
   'pending',
   'verified',
@@ -45,6 +58,10 @@ export const applicationStatus = pgEnum('application_status', [
   'rejected',
   'withdrawn',
 ]);
+
+const bytea = customType<{ data: Buffer }>({
+  dataType: () => 'bytea',
+});
 
 const audit = {
   createdAt: timestamp('created_at', { withTimezone: true })
@@ -118,6 +135,13 @@ export const workerProfiles = pgTable('worker_profiles', {
   rateUnit: rateUnit('rate_unit').notNull().default('day'),
   currency: varchar('currency', { length: 3 }).notNull().default('INR'),
   city: varchar('city', { length: 100 }),
+  background: workerBackground('background'),
+  // Subset of 'railways' | 'highways' — the sectors the candidate will work in.
+  sectors: jsonb('sectors').$type<string[]>().notNull().default([]),
+  qualification: varchar('qualification', { length: 255 }),
+  lastDesignation: varchar('last_designation', { length: 255 }),
+  lastOrganisation: varchar('last_organisation', { length: 255 }),
+  retirementYear: integer('retirement_year'),
   latitude: decimal('latitude', { precision: 10, scale: 7 }),
   longitude: decimal('longitude', { precision: 10, scale: 7 }),
   rating: decimal('rating', { precision: 3, scale: 2 }).notNull().default('0'),
@@ -206,4 +230,22 @@ export const reviews = pgTable('reviews', {
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
+});
+
+/**
+ * A worker's CV, kept in its own table so profile queries never drag the file
+ * bytes along. Stored in Postgres rather than object storage: volumes are small
+ * (one file per candidate, capped at 5 MB) and it keeps backups in one place.
+ */
+export const resumes = pgTable('resumes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  workerId: uuid('worker_id')
+    .notNull()
+    .unique()
+    .references(() => workerProfiles.id, { onDelete: 'cascade' }),
+  fileName: varchar('file_name', { length: 255 }).notNull(),
+  mimeType: varchar('mime_type', { length: 100 }).notNull(),
+  sizeBytes: integer('size_bytes').notNull(),
+  data: bytea('data').notNull(),
+  ...audit,
 });

@@ -1,6 +1,25 @@
 export type Role = 'worker' | 'client' | 'admin';
-export type CategoryGroup = 'physical_labour' | 'driver' | 'artisan' | 'office_staff' | 'other';
-export type RateUnit = 'hour' | 'day' | 'job';
+export type CategoryGroup = 'key_personnel' | 'technical_staff' | 'support_staff';
+export type RateUnit = 'hour' | 'day' | 'job' | 'month';
+export type Background = 'retired_railway' | 'retired_govt' | 'private_sector';
+export type Sector = 'railways' | 'highways';
+
+export const GROUP_LABELS: Record<string, string> = {
+  key_personnel: 'Key personnel',
+  technical_staff: 'Engineers & technical staff',
+  support_staff: 'Office & support staff',
+};
+
+export const BACKGROUND_LABELS: Record<Background, string> = {
+  retired_railway: 'Retired from Indian Railways / railway PSU',
+  retired_govt: 'Retired from other Govt / PSU (NHAI, PWD, MoRTH…)',
+  private_sector: 'Private sector / consultancy',
+};
+
+export const SECTOR_LABELS: Record<Sector, string> = {
+  railways: 'Railways',
+  highways: 'Highways',
+};
 export type JobStatus = 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
 export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';
 
@@ -33,6 +52,12 @@ export interface WorkerProfile {
   rateUnit: RateUnit;
   currency: string;
   city: string | null;
+  background: Background | null;
+  sectors: Sector[];
+  qualification: string | null;
+  lastDesignation: string | null;
+  lastOrganisation: string | null;
+  retirementYear: number | null;
   rating: string;
   completedJobs: number;
   verificationStatus: string;
@@ -75,22 +100,37 @@ export interface JobApplication {
   createdAt: string;
 }
 
+export interface ResumeMeta {
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  updatedAt: string;
+}
+
 export interface RegisterWorkerInput {
   phone: string;
   password: string;
   firstName: string;
   lastName?: string;
+  email?: string;
   categoryId: string;
   yearsExperience?: number;
   minRate: string;
   rateUnit?: RateUnit;
   city?: string;
+  background?: Background;
+  sectors?: Sector[];
+  qualification?: string;
+  lastDesignation?: string;
+  lastOrganisation?: string;
+  retirementYear?: number;
 }
 
 export interface RegisterClientInput {
   phone: string;
   password: string;
   name: string;
+  email?: string;
   companyName?: string;
   clientType?: 'individual' | 'company';
   city?: string;

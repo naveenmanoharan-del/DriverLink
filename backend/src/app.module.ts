@@ -1,4 +1,8 @@
-import { Module, type MiddlewareConsumer, type NestModule } from '@nestjs/common';
+import {
+  Module,
+  type MiddlewareConsumer,
+  type NestModule,
+} from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 import { APP_GUARD } from '@nestjs/core';
@@ -11,6 +15,8 @@ import { ClientsModule } from './clients/clients.module';
 import { JobsModule } from './jobs/jobs.module';
 import { ApplicationsModule } from './applications/applications.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { MailModule } from './mail/mail.module';
+import { ResumesModule } from './resumes/resumes.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -30,6 +36,8 @@ import { AppService } from './app.service';
       }),
     }),
     DatabaseModule,
+    MailModule,
+    ResumesModule,
     AuthModule,
     CategoriesModule,
     WorkersModule,

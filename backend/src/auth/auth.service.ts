@@ -9,10 +9,11 @@ import { JwtService } from '@nestjs/jwt';
 import type { JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomUUID } from 'node:crypto';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull, or } from 'drizzle-orm';
 import { DATABASE } from '../database/database.module';
 import type { Database } from '../database/database.module';
 import {
+  categories,
   clientProfiles,
   refreshTokens,
   users,
@@ -22,6 +23,15 @@ import { RegisterWorkerDto } from './dto/register-worker.dto';
 import { RegisterClientDto } from './dto/register-client.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
+import { detailsTable, MailService } from '../mail/mail.service';
+import { ResumesService } from '../resumes/resumes.service';
+import type { UploadedResume } from '../resumes/resumes.service';
+
+const BACKGROUND_LABELS: Record<string, string> = {
+  retired_railway: 'Retired from Railways',
+  retired_govt: 'Retired from other Govt / PSU',
+  private_sector: 'Private sector',
+};
 
 type Role = 'worker' | 'client' | 'admin';
 
@@ -43,8 +53,7 @@ function hashToken(token: string) {
  * via the pool would hit a foreign key against a user that hasn't committed yet.
  */
 type Executor =
-  | Database
-  | Parameters<Parameters<Database['transaction']>[0]>[0];
+  Database | Parameters<Parameters<Database['transaction']>[0]>[0];
 
 @Injectable()
 export class AuthService {
@@ -52,22 +61,37 @@ export class AuthService {
     @Inject(DATABASE) private readonly db: Database,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly mail: MailService,
+    private readonly resumes: ResumesService,
   ) {}
 
-  async registerWorker(dto: RegisterWorkerDto) {
+  /** Rejects a phone number or email that already belongs to an account. */
+  private async assertUnused(phone: string, email?: string) {
     const existing = await this.db.query.users.findFirst({
-      where: eq(users.phone, dto.phone),
+      where: email
+        ? or(eq(users.phone, phone), eq(users.email, email))
+        : eq(users.phone, phone),
     });
-    if (existing)
-      throw new ConflictException(
-        'An account with this phone number already exists',
-      );
+    if (!existing) return;
+    throw new ConflictException(
+      existing.phone === phone
+        ? 'An account with this phone number already exists'
+        : 'An account with this email already exists',
+    );
+  }
+
+  async registerWorker(dto: RegisterWorkerDto, resume?: UploadedResume) {
+    const email = dto.email?.trim().toLowerCase() || undefined;
+    await this.assertUnused(dto.phone, email);
+    // Reject a bad file before creating anything, so a failed upload doesn't
+    // leave behind an account the person then can't re-register.
+    if (resume) this.resumes.validate(resume);
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
-    return this.db.transaction(async (tx) => {
+    const session = await this.db.transaction(async (tx) => {
       const [user] = await tx
         .insert(users)
-        .values({ phone: dto.phone, passwordHash, role: 'worker' })
+        .values({ phone: dto.phone, email, passwordHash, role: 'worker' })
         .returning();
       const [profile] = await tx
         .insert(workerProfiles)
@@ -78,28 +102,70 @@ export class AuthService {
           categoryId: dto.categoryId,
           yearsExperience: dto.yearsExperience ?? 0,
           minRate: dto.minRate,
-          rateUnit: dto.rateUnit ?? 'day',
+          rateUnit: dto.rateUnit ?? 'month',
           city: dto.city,
+          background: dto.background,
+          sectors: dto.sectors ?? [],
+          qualification: dto.qualification,
+          lastDesignation: dto.lastDesignation,
+          lastOrganisation: dto.lastOrganisation,
+          retirementYear: dto.retirementYear,
         })
         .returning();
+      if (resume) await this.resumes.save(profile.id, resume, tx);
       return this.issueSession(user.id, 'worker', { user, profile }, tx);
     });
+
+    // After commit, and not awaited: the person shouldn't wait on the mail
+    // provider, and a mail failure must not undo a successful registration.
+    void this.notifyWorkerRegistered(dto, email, resume);
+    return session;
+  }
+
+  private async notifyWorkerRegistered(
+    dto: RegisterWorkerDto,
+    email: string | undefined,
+    resume?: UploadedResume,
+  ) {
+    const category = await this.db.query.categories
+      .findFirst({ where: eq(categories.id, dto.categoryId) })
+      .catch(() => undefined);
+    const name = [dto.firstName, dto.lastName].filter(Boolean).join(' ');
+    await this.mail.notifyAdmin(
+      `New candidate: ${name} - ${category?.name ?? 'unknown role'}${resume ? '' : ' (no resume)'}`,
+      `<p style="font-family:sans-serif">A new candidate registered on Yukti Solutions.</p>` +
+        detailsTable([
+          ['Name', name],
+          ['Role', category?.name],
+          ['Phone', dto.phone],
+          ['Email', email],
+          ['Background', dto.background && BACKGROUND_LABELS[dto.background]],
+          ['Sectors', dto.sectors?.join(', ')],
+          ['Qualification', dto.qualification],
+          ['Experience', `${dto.yearsExperience ?? 0} years`],
+          ['Last designation', dto.lastDesignation],
+          ['Last organisation', dto.lastOrganisation],
+          ['Retirement year', dto.retirementYear],
+          ['City', dto.city],
+          [
+            'Expected remuneration',
+            `INR ${dto.minRate} / ${dto.rateUnit ?? 'month'}`,
+          ],
+          ['Resume', resume ? 'attached' : 'not uploaded'],
+        ]),
+      resume ? [{ filename: resume.originalname, content: resume.buffer }] : [],
+    );
   }
 
   async registerClient(dto: RegisterClientDto) {
-    const existing = await this.db.query.users.findFirst({
-      where: eq(users.phone, dto.phone),
-    });
-    if (existing)
-      throw new ConflictException(
-        'An account with this phone number already exists',
-      );
+    const email = dto.email?.trim().toLowerCase() || undefined;
+    await this.assertUnused(dto.phone, email);
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
-    return this.db.transaction(async (tx) => {
+    const session = await this.db.transaction(async (tx) => {
       const [user] = await tx
         .insert(users)
-        .values({ phone: dto.phone, passwordHash, role: 'client' })
+        .values({ phone: dto.phone, email, passwordHash, role: 'client' })
         .returning();
       const [profile] = await tx
         .insert(clientProfiles)
@@ -113,6 +179,20 @@ export class AuthService {
         .returning();
       return this.issueSession(user.id, 'client', { user, profile }, tx);
     });
+
+    void this.mail.notifyAdmin(
+      `New client account: ${dto.companyName || dto.name}`,
+      `<p style="font-family:sans-serif">A new client registered on Yukti Solutions.</p>` +
+        detailsTable([
+          ['Name', dto.name],
+          ['Company', dto.companyName],
+          ['Type', dto.clientType ?? 'individual'],
+          ['Phone', dto.phone],
+          ['Email', email],
+          ['City', dto.city],
+        ]),
+    );
+    return session;
   }
 
   async login(dto: LoginDto) {

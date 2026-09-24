@@ -4,8 +4,12 @@ import {
   Get,
   HttpCode,
   Post,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { RESUME_UPLOAD_OPTIONS } from '../resumes/resumes.service';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterWorkerDto } from './dto/register-worker.dto';
@@ -23,8 +27,14 @@ export class AuthController {
   // Tighter than the global default: registration is cheap to spam and creates real DB rows.
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('register/worker')
-  registerWorker(@Body() dto: RegisterWorkerDto) {
-    return this.auth.registerWorker(dto);
+  // Optional `resume` file: the website sends multipart form data with one
+  // attached, while the app's JSON body passes through untouched.
+  @UseInterceptors(FileInterceptor('resume', RESUME_UPLOAD_OPTIONS))
+  registerWorker(
+    @Body() dto: RegisterWorkerDto,
+    @UploadedFile() resume?: Express.Multer.File,
+  ) {
+    return this.auth.registerWorker(dto, resume);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60_000 } })

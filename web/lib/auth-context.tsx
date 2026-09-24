@@ -15,7 +15,7 @@ interface AuthContextValue {
   session: Session | null;
   loading: boolean;
   loginWithPhone: (phone: string, password: string) => Promise<Session>;
-  registerWorker: (dto: RegisterWorkerInput) => Promise<Session>;
+  registerWorker: (dto: RegisterWorkerInput, resume?: File) => Promise<Session>;
   registerClient: (dto: RegisterClientInput) => Promise<Session>;
   refreshProfile: () => Promise<void>;
   logout: () => void;
@@ -80,8 +80,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result;
   }
 
-  async function registerWorker(dto: RegisterWorkerInput) {
-    const result = await apiFetch<Session>('/v1/auth/register/worker', { method: 'POST', body: dto });
+  async function registerWorker(dto: RegisterWorkerInput, resume?: File) {
+    // Multipart so the resume travels with the registration in one request.
+    const form = new FormData();
+    for (const [key, value] of Object.entries(dto)) {
+      if (value === undefined || value === '') continue;
+      form.append(key, Array.isArray(value) ? value.join(',') : String(value));
+    }
+    if (resume) form.append('resume', resume);
+    const result = await apiFetch<Session>('/v1/auth/register/worker', { method: 'POST', body: form });
     persist(result);
     return result;
   }

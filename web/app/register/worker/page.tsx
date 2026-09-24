@@ -5,16 +5,16 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { apiFetch } from '@/lib/api';
-import type { Category, RateUnit } from '@/lib/types';
+import {
+  BACKGROUND_LABELS,
+  GROUP_LABELS,
+  SECTOR_LABELS,
+  type Background,
+  type Category,
+  type Sector,
+} from '@/lib/types';
 import { Button, Card, Eyebrow, Field, Select, TextInput } from '@/components/ui';
-
-const GROUP_LABELS: Record<string, string> = {
-  physical_labour: 'Physical labour',
-  driver: 'Drivers',
-  artisan: 'Artisans',
-  office_staff: 'Office staff',
-  other: 'Other',
-};
+import { ResumeInput, validateResume } from '@/components/resume-input';
 
 export default function RegisterWorkerPage() {
   const { registerWorker } = useAuth();
@@ -22,16 +22,23 @@ export default function RegisterWorkerPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [resume, setResume] = useState<File | null>(null);
 
   const [form, setForm] = useState({
     phone: '',
+    email: '',
     password: '',
     firstName: '',
     lastName: '',
     categoryId: '',
-    yearsExperience: '0',
+    background: '' as Background | '',
+    sectors: ['railways'] as Sector[],
+    qualification: '',
+    yearsExperience: '',
+    lastDesignation: '',
+    lastOrganisation: '',
+    retirementYear: '',
     minRate: '',
-    rateUnit: 'day' as RateUnit,
     city: '',
   });
 
@@ -48,22 +55,46 @@ export default function RegisterWorkerPage() {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  function toggleSector(sector: Sector) {
+    setForm((f) => ({
+      ...f,
+      sectors: f.sectors.includes(sector) ? f.sectors.filter((s) => s !== sector) : [...f.sectors, sector],
+    }));
+  }
+
+  const retired = form.background === 'retired_railway' || form.background === 'retired_govt';
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    if (form.sectors.length === 0) return setError('Choose at least one sector.');
+    if (!resume) return setError('Please attach your resume.');
+    const resumeError = validateResume(resume);
+    if (resumeError) return setError(resumeError);
+
     setSubmitting(true);
     try {
-      await registerWorker({
-        phone: form.phone,
-        password: form.password,
-        firstName: form.firstName,
-        lastName: form.lastName || undefined,
-        categoryId: form.categoryId,
-        yearsExperience: Number(form.yearsExperience) || 0,
-        minRate: form.minRate,
-        rateUnit: form.rateUnit,
-        city: form.city || undefined,
-      });
+      await registerWorker(
+        {
+          phone: form.phone,
+          email: form.email,
+          password: form.password,
+          firstName: form.firstName,
+          lastName: form.lastName || undefined,
+          categoryId: form.categoryId,
+          background: form.background || undefined,
+          sectors: form.sectors,
+          qualification: form.qualification || undefined,
+          yearsExperience: Number(form.yearsExperience) || 0,
+          lastDesignation: form.lastDesignation || undefined,
+          lastOrganisation: form.lastOrganisation || undefined,
+          retirementYear: retired && form.retirementYear ? Number(form.retirementYear) : undefined,
+          minRate: form.minRate,
+          rateUnit: 'month',
+          city: form.city || undefined,
+        },
+        resume,
+      );
       router.push('/worker');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -73,13 +104,17 @@ export default function RegisterWorkerPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-12">
+    <div className="mx-auto max-w-xl px-4 py-12">
       <Eyebrow>Join the register</Eyebrow>
-      <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">Register as a worker</h1>
-      <p className="mt-1 text-sm text-body">Find labour, driving, artisan or office work near you.</p>
+      <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">Submit your CV</h1>
+      <p className="mt-1 text-sm text-body">
+        For railway and highway consultancy assignments — GC, PMC, PGMS, PSSA, Authority / Independent Engineer.
+        Retired railway and government officers are especially welcome.
+      </p>
 
       <Card className="mt-6 p-6">
         <form onSubmit={handleSubmit} className="space-y-5">
+          <SectionTitle>About you</SectionTitle>
           <div className="grid grid-cols-2 gap-4">
             <Field label="First name">
               <TextInput required value={form.firstName} onChange={(e) => update('firstName', e.target.value)} />
@@ -89,17 +124,22 @@ export default function RegisterWorkerPage() {
             </Field>
           </div>
 
-          <Field label="Phone number">
-            <TextInput
-              type="tel"
-              required
-              placeholder="+919000000000"
-              value={form.phone}
-              onChange={(e) => update('phone', e.target.value)}
-            />
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Phone number">
+              <TextInput
+                type="tel"
+                required
+                placeholder="+919000000000"
+                value={form.phone}
+                onChange={(e) => update('phone', e.target.value)}
+              />
+            </Field>
+            <Field label="Email">
+              <TextInput type="email" required value={form.email} onChange={(e) => update('email', e.target.value)} />
+            </Field>
+          </div>
 
-          <Field label="Password">
+          <Field label="Password (to log in later)">
             <TextInput
               type="password"
               required
@@ -109,10 +149,15 @@ export default function RegisterWorkerPage() {
             />
           </Field>
 
-          <Field label="Category / trade">
+          <Field label="City">
+            <TextInput value={form.city} onChange={(e) => update('city', e.target.value)} />
+          </Field>
+
+          <SectionTitle>Your experience</SectionTitle>
+          <Field label="Position you are applying for">
             <Select required value={form.categoryId} onChange={(e) => update('categoryId', e.target.value)}>
               <option value="" disabled>
-                Select a category
+                Select a position
               </option>
               {Object.entries(grouped).map(([group, items]) => (
                 <optgroup key={group} label={GROUP_LABELS[group] ?? group}>
@@ -126,22 +171,99 @@ export default function RegisterWorkerPage() {
             </Select>
           </Field>
 
+          <Field label="Background">
+            <Select
+              required
+              value={form.background}
+              onChange={(e) => update('background', e.target.value as Background)}
+            >
+              <option value="" disabled>
+                Select your background
+              </option>
+              {Object.entries(BACKGROUND_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
+          <fieldset>
+            <legend className="text-sm font-medium text-body">Sectors you will work in</legend>
+            <div className="mt-2 flex gap-3">
+              {(Object.keys(SECTOR_LABELS) as Sector[]).map((sector) => {
+                const on = form.sectors.includes(sector);
+                return (
+                  <label
+                    key={sector}
+                    className={`flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                      on ? 'border-accent bg-accent/10 text-accent-dark' : 'border-line text-body hover:bg-bg-soft'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={on}
+                      onChange={() => toggleSector(sector)}
+                      className="accent-[var(--color-accent)]"
+                    />
+                    {SECTOR_LABELS[sector]}
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Years of experience">
+            <Field label="Highest qualification">
+              <TextInput
+                required
+                placeholder="e.g. B.E. Civil"
+                value={form.qualification}
+                onChange={(e) => update('qualification', e.target.value)}
+              />
+            </Field>
+            <Field label="Total experience (years)">
               <TextInput
                 type="number"
+                required
                 min={0}
+                max={70}
                 value={form.yearsExperience}
                 onChange={(e) => update('yearsExperience', e.target.value)}
               />
             </Field>
-            <Field label="City">
-              <TextInput value={form.city} onChange={(e) => update('city', e.target.value)} />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={retired ? 'Designation at retirement' : 'Current / last designation'}>
+              <TextInput
+                placeholder={retired ? 'e.g. Chief Engineer' : 'e.g. Senior Bridge Engineer'}
+                value={form.lastDesignation}
+                onChange={(e) => update('lastDesignation', e.target.value)}
+              />
+            </Field>
+            <Field label={retired ? 'Railway zone / organisation' : 'Current / last employer'}>
+              <TextInput
+                placeholder={retired ? 'e.g. Southern Railway' : ''}
+                value={form.lastOrganisation}
+                onChange={(e) => update('lastOrganisation', e.target.value)}
+              />
             </Field>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Minimum rate (INR)">
+            {retired && (
+              <Field label="Year of retirement">
+                <TextInput
+                  type="number"
+                  min={1970}
+                  max={new Date().getFullYear()}
+                  value={form.retirementYear}
+                  onChange={(e) => update('retirementYear', e.target.value)}
+                />
+              </Field>
+            )}
+            <Field label="Expected salary (₹ / month)">
               <TextInput
                 type="number"
                 required
@@ -150,19 +272,15 @@ export default function RegisterWorkerPage() {
                 onChange={(e) => update('minRate', e.target.value)}
               />
             </Field>
-            <Field label="Per">
-              <Select value={form.rateUnit} onChange={(e) => update('rateUnit', e.target.value as RateUnit)}>
-                <option value="hour">Hour</option>
-                <option value="day">Day</option>
-                <option value="job">Job</option>
-              </Select>
-            </Field>
           </div>
+
+          <SectionTitle>Resume</SectionTitle>
+          <ResumeInput file={resume} onChange={setResume} />
 
           {error && <p className="text-sm text-warn">{error}</p>}
 
           <Button type="submit" disabled={submitting} arrow={false} className="w-full">
-            {submitting ? 'Creating account…' : 'Create worker account'}
+            {submitting ? 'Submitting…' : 'Create account & submit CV'}
           </Button>
         </form>
       </Card>
@@ -172,7 +290,7 @@ export default function RegisterWorkerPage() {
         <Link href="/login" className="font-medium text-accent-dark underline">
           Log in
         </Link>
-        . Hiring instead?{' '}
+        . Hiring for a contract instead?{' '}
         <Link href="/register/client" className="font-medium text-accent-dark underline">
           Register as a client
         </Link>
@@ -180,4 +298,8 @@ export default function RegisterWorkerPage() {
       </p>
     </div>
   );
+}
+
+function SectionTitle({ children }: { children: string }) {
+  return <p className="border-b border-line pb-2 pt-2 text-sm font-semibold text-ink first:pt-0">{children}</p>;
 }

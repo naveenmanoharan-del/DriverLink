@@ -44,7 +44,7 @@ export function NavBar() {
               </Link>
               <Link href="/register/worker">
                 <Button arrow={false} className="px-4 py-2 text-xs">
-                  Get started
+                  Submit CV
                 </Button>
               </Link>
             </>

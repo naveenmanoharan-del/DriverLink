@@ -7,11 +7,9 @@ import '../theme.dart';
 import '../widgets/app_button.dart';
 
 const Map<String, String> _groupLabels = {
-  'physical_labour': 'Physical labour',
-  'driver': 'Drivers',
-  'artisan': 'Artisans',
-  'office_staff': 'Office staff',
-  'other': 'Other',
+  'key_personnel': 'Key personnel',
+  'technical_staff': 'Engineers & technical staff',
+  'support_staff': 'Office & support staff',
 };
 
 class RegisterWorkerScreen extends StatefulWidget {
@@ -32,7 +30,7 @@ class _RegisterWorkerScreenState extends State<RegisterWorkerScreen> {
   final _years = TextEditingController(text: '0');
   final _city = TextEditingController();
   final _minRate = TextEditingController();
-  String _rateUnit = 'day';
+  String _rateUnit = 'month';
   String? _categoryId;
 
   List<Category> _categories = [];
@@ -229,12 +227,13 @@ class _RegisterWorkerScreenState extends State<RegisterWorkerScreen> {
                         value: _rateUnit,
                         decoration: const InputDecoration(labelText: 'Per'),
                         items: const [
+                          DropdownMenuItem(value: 'month', child: Text('Month')),
                           DropdownMenuItem(value: 'hour', child: Text('Hour')),
                           DropdownMenuItem(value: 'day', child: Text('Day')),
                           DropdownMenuItem(value: 'job', child: Text('Job')),
                         ],
                         onChanged:
-                            (v) => setState(() => _rateUnit = v ?? 'day'),
+                            (v) => setState(() => _rateUnit = v ?? 'month'),
                       ),
                     ),
                   ],
