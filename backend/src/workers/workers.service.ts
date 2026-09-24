@@ -1,8 +1,13 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { and, asc, desc, eq } from 'drizzle-orm';
 import { DATABASE } from '../database/database.module';
 import type { Database } from '../database/database.module';
-import { workerProfiles } from '../database/schema';
+import { categories, users, workerProfiles } from '../database/schema';
 import { UpdateWorkerProfileDto } from './dto/update-worker-profile.dto';
 import { SearchWorkersDto } from './dto/search-workers.dto';
 
@@ -27,6 +32,13 @@ export class WorkersService {
   }
 
   async updateByUserId(userId: string, dto: UpdateWorkerProfileDto) {
+    if (dto.categoryId) {
+      const category = await this.db.query.categories.findFirst({
+        where: eq(categories.id, dto.categoryId),
+      });
+      if (!category?.isActive)
+        throw new BadRequestException('Choose one of the listed positions');
+    }
     const [profile] = await this.db
       .update(workerProfiles)
       .set({ ...dto, updatedAt: new Date() })
@@ -54,12 +66,15 @@ export class WorkersService {
     const where = conditions.length ? and(...conditions) : undefined;
 
     const results = await this.db
-      .select()
+      .select({ profile: workerProfiles })
       .from(workerProfiles)
-      .where(where)
+      .innerJoin(users, eq(users.id, workerProfiles.userId))
+      .where(and(eq(users.isActive, true), where))
+      // A stable order, or pages overlap and skip people.
+      .orderBy(desc(workerProfiles.createdAt), asc(workerProfiles.id))
       .limit(pageSize)
       .offset((page - 1) * pageSize);
 
-    return { data: results, page, pageSize };
+    return { data: results.map((r) => r.profile), page, pageSize };
   }
 }

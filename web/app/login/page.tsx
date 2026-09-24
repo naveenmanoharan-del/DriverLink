@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
+import { homeFor } from '@/components/require-role';
 import { Button, Card, Eyebrow, Field, TextInput } from '@/components/ui';
 
 export default function LoginPage() {
@@ -20,7 +21,7 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       const session = await loginWithPhone(phone, password);
-      router.push(session.user.role === 'worker' ? '/worker' : '/client');
+      router.push(homeFor(session.user.role));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -57,7 +58,7 @@ export default function LoginPage() {
       <p className="mt-6 text-sm text-body">
         New here?{' '}
         <Link href="/register/worker" className="font-medium text-accent-dark underline">
-          Register as a worker
+          Submit your CV
         </Link>{' '}
         or{' '}
         <Link href="/register/client" className="font-medium text-accent-dark underline">

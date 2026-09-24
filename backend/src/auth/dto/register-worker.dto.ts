@@ -62,7 +62,11 @@ export class RegisterWorkerDto {
   @Max(70)
   yearsExperience?: number;
 
+  // IsNumberString alone accepts "-5" and "1e9".
   @IsNumberString()
+  @Matches(/^\d{1,12}(\.\d{1,2})?$/, {
+    message: 'minRate must be a positive amount with at most 2 decimals',
+  })
   minRate!: string;
 
   @IsOptional()

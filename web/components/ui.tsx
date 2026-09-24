@@ -116,6 +116,14 @@ const STATUS_STYLES: Record<string, string> = {
   rejected: 'bg-warn/10 text-warn',
   withdrawn: 'bg-warn/10 text-warn',
   cancelled: 'bg-warn/10 text-warn',
+  // Recruitment pipeline and placements (admin).
+  new: 'bg-accent/10 text-accent-dark',
+  shortlisted: 'bg-teal/10 text-teal-dark',
+  interviewed: 'bg-teal/10 text-teal-dark',
+  placed: 'bg-ink/8 text-ink',
+  on_hold: 'bg-bg-soft text-body',
+  active: 'bg-teal/10 text-teal-dark',
+  terminated: 'bg-warn/10 text-warn',
 };
 
 export function StatusPill({ status }: { status: string }) {

@@ -19,6 +19,7 @@ import {
   ResumesService,
 } from '../resumes/resumes.service';
 import { detailsTable, MailService } from '../mail/mail.service';
+import { publicProfile } from './public-profile';
 import { WorkersService } from './workers.service';
 import { UpdateWorkerProfileDto } from './dto/update-worker-profile.dto';
 import { SearchWorkersDto } from './dto/search-workers.dto';
@@ -39,15 +40,18 @@ export class WorkersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('worker')
   @Get('me')
-  me(@CurrentUser() user: AuthUser) {
-    return this.workers.findByUserId(user.userId);
+  async me(@CurrentUser() user: AuthUser) {
+    return publicProfile(await this.workers.findByUserId(user.userId));
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('worker')
   @Put('me')
-  updateMe(@CurrentUser() user: AuthUser, @Body() dto: UpdateWorkerProfileDto) {
-    return this.workers.updateByUserId(user.userId, dto);
+  async updateMe(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: UpdateWorkerProfileDto,
+  ) {
+    return publicProfile(await this.workers.updateByUserId(user.userId, dto));
   }
 
   /** Metadata of the uploaded resume, or null when there isn't one. */
@@ -100,13 +104,20 @@ export class WorkersController {
     return saved;
   }
 
+  // Candidate data is personal, so browsing it needs an account: only clients
+  // (who hire) and admins. It used to be public to anyone on the internet.
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('client', 'admin')
   @Get()
-  search(@Query() query: SearchWorkersDto) {
-    return this.workers.search(query);
+  async search(@Query() query: SearchWorkersDto) {
+    const result = await this.workers.search(query);
+    return { ...result, data: result.data.map(publicProfile) };
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('client', 'admin')
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.workers.findOne(id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return publicProfile(await this.workers.findOne(id));
   }
 }

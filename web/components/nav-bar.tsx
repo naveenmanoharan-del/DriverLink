@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui';
+import { homeFor } from '@/components/require-role';
 
 export function NavBar() {
   const { session, logout, loading } = useAuth();
@@ -27,10 +28,10 @@ export function NavBar() {
           {loading ? null : session ? (
             <>
               <Link
-                href={session.user.role === 'worker' ? '/worker' : '/client'}
+                href={homeFor(session.user.role)}
                 className="hidden font-medium text-body transition-colors duration-200 hover:text-ink sm:inline"
               >
-                Dashboard
+                {session.user.role === 'admin' ? 'Admin' : 'Dashboard'}
               </Link>
               <span className="hidden text-body sm:inline">{session.user.phone}</span>
               <Button variant="secondary" arrow={false} onClick={handleLogout} className="px-4 py-2 text-xs">

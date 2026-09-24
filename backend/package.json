@@ -20,7 +20,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "ts-node -r tsconfig-paths/register scripts/seed.ts",
-    "test:api": "node test/api-e2e.mjs"
+    "test:api": "node test/api-e2e.mjs",
+    "test:admin": "node test/admin-e2e.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

@@ -16,6 +16,7 @@ import { RegisterWorkerDto } from './dto/register-worker.dto';
 import { RegisterClientDto } from './dto/register-client.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from '../common/decorators/current-user.decorator';
@@ -69,6 +70,21 @@ export class AuthController {
   @Post('logout')
   logout(@Body() dto: RefreshDto) {
     return this.auth.logout(dto.refreshToken);
+  }
+
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @Post('change-password')
+  changePassword(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.auth.changePassword(
+      user.userId,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 
   @UseGuards(JwtAuthGuard)

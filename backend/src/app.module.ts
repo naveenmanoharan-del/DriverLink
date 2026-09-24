@@ -17,6 +17,7 @@ import { ApplicationsModule } from './applications/applications.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { MailModule } from './mail/mail.module';
 import { ResumesModule } from './resumes/resumes.module';
+import { AdminModule } from './admin/admin.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -45,6 +46,7 @@ import { AppService } from './app.service';
     JobsModule,
     ApplicationsModule,
     ReviewsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

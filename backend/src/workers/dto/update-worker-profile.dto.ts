@@ -11,6 +11,7 @@ import {
   Min,
   MaxLength,
   ArrayUnique,
+  Matches,
 } from 'class-validator';
 import { BACKGROUNDS, SECTORS } from '../../auth/dto/register-worker.dto';
 
@@ -23,7 +24,12 @@ export class UpdateWorkerProfileDto {
   @IsOptional() @IsString() @MaxLength(2000) bio?: string;
   @IsOptional() @IsIn(['offline', 'available', 'engaged']) availability?:
     'offline' | 'available' | 'engaged';
-  @IsOptional() @IsNumberString() minRate?: string;
+  @IsOptional()
+  @IsNumberString()
+  @Matches(/^\d{1,12}(\.\d{1,2})?$/, {
+    message: 'minRate must be a positive amount with at most 2 decimals',
+  })
+  minRate?: string;
   @IsOptional() @IsIn(['hour', 'day', 'job', 'month']) rateUnit?:
     'hour' | 'day' | 'job' | 'month';
   @IsOptional() @IsString() @MaxLength(100) city?: string;

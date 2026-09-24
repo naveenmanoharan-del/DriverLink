@@ -5,6 +5,7 @@ import { Pool } from 'pg';
 import * as schema from './schema';
 import { sslFor } from './ssl';
 import { seedCategories } from './categories.seed';
+import { bootstrapAdmin } from './bootstrap-admin';
 
 /**
  * Runs before the API starts (see `start:prod`), so a deploy brings the
@@ -24,6 +25,7 @@ async function main() {
   try {
     await migrate(db, { migrationsFolder: 'drizzle' });
     await seedCategories(db);
+    await bootstrapAdmin(db);
     console.log('Database migrated and categories seeded.');
   } finally {
     await pool.end();

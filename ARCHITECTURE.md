@@ -121,7 +121,26 @@ PATCH  /v1/applications/:id/withdraw              [worker, owner only]
 
 POST   /v1/jobs/:jobId/reviews                    [auth] rate the other party
 GET    /v1/reviews?userId=...                     public reviews for a user
+
+POST   /v1/auth/change-password                   [auth] ends other sessions
+PUT    /v1/workers/me/resume                      [worker] multipart `resume`
+GET    /v1/workers/me/resume(/file)               [worker] metadata / download
+
+GET    /v1/admin/stats?days=                      [admin] dashboard figures
+GET    /v1/admin/candidates?q&group&…             [admin] search + filters
+GET    /v1/admin/candidates/export                [admin] CSV (same filters)
+GET    /v1/admin/candidates/:id(/resume)          [admin] detail / resume file
+PATCH  /v1/admin/candidates/:id                   [admin] pipeline, verification, notes
+GET    /v1/admin/clients(/:id)                    [admin]
+PATCH  /v1/admin/users/:userId/active             [admin] (de)activate any account
+DELETE /v1/admin/users/:userId                    [admin] permanent delete
+GET|POST /v1/admin/placements, PATCH|DELETE /:id  [admin]
+GET|POST /v1/admin/admins, GET /v1/admin/audit     [admin]
 ```
+
+`GET /v1/workers` and `/v1/workers/:id` require a client or admin login: they
+list personal data. Admin-only fields (`adminNotes`, `pipelineStatus`) are
+stripped from every non-admin response by `workers/public-profile.ts`.
 
 ## Repository layout
 
@@ -232,7 +251,9 @@ traffic by default — verified by inspecting the merged manifest of both build 
 ## Testing
 
 ```bash
-cd backend && npm run test:api        # 77 checks against a running server
+cd backend && npm run test:api        # 84 checks against a running server
+cd backend && ADMIN_PHONE=… ADMIN_PASSWORD=… npm run test:admin   # 211 checks: registration
+                                      # limits, resume handling, privacy, admin API
 cd mobile  && flutter test            # widget tests
 cd mobile  && flutter analyze         # static analysis
 cd web     && npm run build           # type-checks as part of the build
@@ -277,8 +298,8 @@ These are natural next additions, not oversights:
 - **Payments / escrow** — no wallet debit/credit logic yet, though `client_profiles.walletBalance` exists
   as a placeholder in the original schema exploration.
 - **Push notifications** — job/application status changes aren't pushed to the app yet.
-- **Admin panel** — `admin` is a valid `role` and routes could be gated with `@Roles('admin')`, but no
-  admin UI exists yet (e.g. approving worker verification, managing categories).
+- **Category management UI** — the admin panel (`/admin`) covers candidates, clients, placements and
+  admins, but the list of positions is still edited in `backend/src/database/categories.seed.ts`.
 - **HTTPS** — the backend is still served over plain HTTP locally. Cleartext is no longer enabled in the
   app's release builds (see "Sessions and revocation"), so the API must be behind TLS before a release
   build can talk to it at all.

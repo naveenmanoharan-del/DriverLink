@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -23,6 +24,7 @@ import { RegisterWorkerDto } from './dto/register-worker.dto';
 import { RegisterClientDto } from './dto/register-client.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
+import { publicProfileOrNull } from '../workers/public-profile';
 import { detailsTable, MailService } from '../mail/mail.service';
 import { ResumesService } from '../resumes/resumes.service';
 import type { UploadedResume } from '../resumes/resumes.service';
@@ -80,9 +82,23 @@ export class AuthService {
     );
   }
 
+  /**
+   * A 400 for an unknown or retired category. Without it an unknown id hits
+   * the foreign key and surfaces as a 500, and a retired one (e.g. an old
+   * artisan category) would still be accepted.
+   */
+  private async assertActiveCategory(categoryId: string) {
+    const category = await this.db.query.categories.findFirst({
+      where: eq(categories.id, categoryId),
+    });
+    if (!category?.isActive)
+      throw new BadRequestException('Choose one of the listed positions');
+  }
+
   async registerWorker(dto: RegisterWorkerDto, resume?: UploadedResume) {
     const email = dto.email?.trim().toLowerCase() || undefined;
     await this.assertUnused(dto.phone, email);
+    await this.assertActiveCategory(dto.categoryId);
     // Reject a bad file before creating anything, so a failed upload doesn't
     // leave behind an account the person then can't re-register.
     if (resume) this.resumes.validate(resume);
@@ -113,7 +129,12 @@ export class AuthService {
         })
         .returning();
       if (resume) await this.resumes.save(profile.id, resume, tx);
-      return this.issueSession(user.id, 'worker', { user, profile }, tx);
+      return this.issueSession(
+        user.id,
+        'worker',
+        { user, profile: publicProfileOrNull(profile) },
+        tx,
+      );
     });
 
     // After commit, and not awaited: the person shouldn't wait on the mail
@@ -207,8 +228,39 @@ export class AuthService {
     if (!valid)
       throw new UnauthorizedException('Invalid phone number or password');
 
+    await this.db
+      .update(users)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(users.id, user.id));
     const profile = await this.loadProfile(user.id, user.role);
     return this.issueSession(user.id, user.role, { user, profile });
+  }
+
+  /** Changes the signed-in user's password and ends their other sessions. */
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+    if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash)))
+      throw new UnauthorizedException('Current password is incorrect');
+    await this.db
+      .update(users)
+      .set({
+        passwordHash: await bcrypt.hash(newPassword, 10),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+    await this.db
+      .update(refreshTokens)
+      .set({ revokedAt: new Date() })
+      .where(
+        and(eq(refreshTokens.userId, userId), isNull(refreshTokens.revokedAt)),
+      );
+    return { success: true };
   }
 
   async refresh(dto: RefreshDto) {
@@ -281,9 +333,11 @@ export class AuthService {
 
   private async loadProfile(userId: string, role: Role) {
     if (role === 'worker')
-      return this.db.query.workerProfiles.findFirst({
-        where: eq(workerProfiles.userId, userId),
-      });
+      return publicProfileOrNull(
+        await this.db.query.workerProfiles.findFirst({
+          where: eq(workerProfiles.userId, userId),
+        }),
+      );
     if (role === 'client')
       return this.db.query.clientProfiles.findFirst({
         where: eq(clientProfiles.userId, userId),

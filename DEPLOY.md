@@ -22,6 +22,29 @@ list from `src/database/categories.seed.ts`. Categories not in that file are
 deactivated (hidden from forms, kept for old profiles). To change the roles on
 offer, edit that file and deploy — nothing needs running by hand.
 
+### The admin panel
+
+`/admin` is the owner's back office: a dashboard of registrations, departments,
+pipeline and placements; searchable candidate lists with resume preview, notes,
+status and CSV export; clients; placements; an activity log of every admin
+change; and admin/password settings.
+
+The first admin is created from two environment variables on `yukti-api`:
+
+| Variable | Value |
+|---|---|
+| `ADMIN_PHONE` | the phone number you'll log in with, e.g. `+919876543210` (must not already belong to a candidate or client) |
+| `ADMIN_PASSWORD` | 8–72 characters |
+
+On the next deploy the migrate step creates the account (the log says `Admin
+account created`). Log in at `/login` and you land on `/admin`. Add further admins
+from **Admin → Settings**. Forgotten password: set `ADMIN_RESET_PASSWORD=true`
+with a new `ADMIN_PASSWORD`, redeploy, log in, then delete `ADMIN_RESET_PASSWORD`.
+
+Deactivating an account signs it out everywhere immediately (every request
+re-checks the account). Deleting is permanent; placement records keep the
+person's name so the statistics survive.
+
 ### Email notifications
 
 Every new account (candidate or client) and every resume upload emails

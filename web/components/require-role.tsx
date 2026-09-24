@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import type { Role } from '@/lib/types';
 
+/** Where each role lands after logging in. */
+export function homeFor(role: Role) {
+  return role === 'admin' ? '/admin' : role === 'worker' ? '/worker' : '/client';
+}
+
 export function RequireRole({ role, children }: { role: Role; children: ReactNode }) {
   const { session, loading } = useAuth();
   const router = useRouter();
@@ -16,7 +21,7 @@ export function RequireRole({ role, children }: { role: Role; children: ReactNod
       return;
     }
     if (session.user.role !== role) {
-      router.replace(session.user.role === 'worker' ? '/worker' : '/client');
+      router.replace(homeFor(session.user.role));
     }
   }, [loading, session, role, router]);
 

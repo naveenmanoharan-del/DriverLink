@@ -51,11 +51,14 @@ export default function RegisterWorkerPage() {
     return acc;
   }, {});
 
+  // Any edit clears the last error, so it never describes a problem that's fixed.
   function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
+    setError(null);
     setForm((f) => ({ ...f, [key]: value }));
   }
 
   function toggleSector(sector: Sector) {
+    setError(null);
     setForm((f) => ({
       ...f,
       sectors: f.sectors.includes(sector) ? f.sectors.filter((s) => s !== sector) : [...f.sectors, sector],
@@ -275,7 +278,13 @@ export default function RegisterWorkerPage() {
           </div>
 
           <SectionTitle>Resume</SectionTitle>
-          <ResumeInput file={resume} onChange={setResume} />
+          <ResumeInput
+            file={resume}
+            onChange={(file) => {
+              setError(null);
+              setResume(file);
+            }}
+          />
 
           {error && <p className="text-sm text-warn">{error}</p>}
 

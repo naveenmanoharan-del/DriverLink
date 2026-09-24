@@ -1,7 +1,9 @@
 import {
   boolean,
   customType,
+  date,
   decimal,
+  index,
   integer,
   jsonb,
   pgEnum,
@@ -59,6 +61,30 @@ export const applicationStatus = pgEnum('application_status', [
   'withdrawn',
 ]);
 
+/** Where a candidate stands in the owner's recruitment process. */
+export const pipelineStatus = pgEnum('pipeline_status', [
+  'new',
+  'shortlisted',
+  'interviewed',
+  'placed',
+  'on_hold',
+  'rejected',
+]);
+export const placementStatus = pgEnum('placement_status', [
+  'active',
+  'completed',
+  'terminated',
+]);
+export const contractType = pgEnum('contract_type', [
+  'gc',
+  'pmc',
+  'pgms',
+  'pssa',
+  'ae',
+  'ie',
+  'other',
+]);
+
 const bytea = customType<{ data: Buffer }>({
   dataType: () => 'bytea',
 });
@@ -79,6 +105,7 @@ export const users = pgTable('users', {
   passwordHash: text('password_hash').notNull(),
   role: userRole('role').notNull(),
   isActive: boolean('is_active').notNull().default(true),
+  lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
   ...audit,
 });
 
@@ -149,6 +176,9 @@ export const workerProfiles = pgTable('worker_profiles', {
   verificationStatus: verificationStatus('verification_status')
     .notNull()
     .default('pending'),
+  pipelineStatus: pipelineStatus('pipeline_status').notNull().default('new'),
+  // Private to admins: never returned by the public or worker-facing routes.
+  adminNotes: text('admin_notes'),
   ...audit,
 });
 
@@ -249,3 +279,70 @@ export const resumes = pgTable('resumes', {
   data: bytea('data').notNull(),
   ...audit,
 });
+
+/**
+ * A candidate supplied to a company. Recorded by an admin, or automatically
+ * when a client accepts an application on the platform.
+ *
+ * The candidate and client links are nullable (SET NULL) with the names copied
+ * in, so deleting an account does not erase placement history or skew the
+ * "placed per company" figures.
+ */
+export const placements = pgTable(
+  'placements',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    workerId: uuid('worker_id').references(() => workerProfiles.id, {
+      onDelete: 'set null',
+    }),
+    candidateName: varchar('candidate_name', { length: 255 }).notNull(),
+    clientId: uuid('client_id').references(() => clientProfiles.id, {
+      onDelete: 'set null',
+    }),
+    companyName: varchar('company_name', { length: 255 }).notNull(),
+    position: varchar('position', { length: 255 }).notNull(),
+    projectName: varchar('project_name', { length: 255 }),
+    contractType: contractType('contract_type').notNull().default('other'),
+    sector: varchar('sector', { length: 20 }),
+    location: varchar('location', { length: 255 }),
+    startDate: date('start_date').notNull(),
+    endDate: date('end_date'),
+    monthlyRemuneration: decimal('monthly_remuneration', {
+      precision: 14,
+      scale: 2,
+    }),
+    status: placementStatus('status').notNull().default('active'),
+    notes: text('notes'),
+    applicationId: uuid('application_id')
+      .unique()
+      .references(() => jobApplications.id, { onDelete: 'set null' }),
+    createdBy: uuid('created_by').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    ...audit,
+  },
+  (t) => [
+    index('placements_worker_idx').on(t.workerId),
+    index('placements_company_idx').on(t.companyName),
+  ],
+);
+
+/** Every change an admin makes, for accountability and undo-by-hand. */
+export const adminAuditLog = pgTable(
+  'admin_audit_log',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    actorId: uuid('actor_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    actorLabel: varchar('actor_label', { length: 255 }).notNull(),
+    action: varchar('action', { length: 64 }).notNull(),
+    targetType: varchar('target_type', { length: 32 }).notNull(),
+    targetId: uuid('target_id'),
+    summary: text('summary').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index('admin_audit_created_idx').on(t.createdAt)],
+);

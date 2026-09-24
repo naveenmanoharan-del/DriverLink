@@ -9,11 +9,14 @@ import { and, eq } from 'drizzle-orm';
 import { DATABASE } from '../database/database.module';
 import type { Database } from '../database/database.module';
 import {
+  categories,
   clientProfiles,
   jobApplications,
   jobs,
+  placements,
   workerProfiles,
 } from '../database/schema';
+import { indiaDate } from '../common/india-date';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { DecideApplicationDto } from './dto/decide-application.dto';
 
@@ -126,7 +129,56 @@ export class ApplicationsService {
         .where(eq(jobs.id, job.id));
     }
 
+    if (dto.status === 'accepted') await this.recordPlacement(updated, job);
+
     return updated;
+  }
+
+  /**
+   * An accepted application is a placement, so it counts in the admin
+   * dashboard's "placed" figures without anyone re-entering it. Idempotent:
+   * the unique application_id makes re-accepting a no-op.
+   */
+  private async recordPlacement(
+    application: typeof jobApplications.$inferSelect,
+    job: typeof jobs.$inferSelect,
+  ) {
+    const [worker, client, category] = await Promise.all([
+      this.db.query.workerProfiles.findFirst({
+        where: eq(workerProfiles.id, application.workerId),
+      }),
+      this.db.query.clientProfiles.findFirst({
+        where: eq(clientProfiles.id, job.clientId),
+      }),
+      this.db.query.categories.findFirst({
+        where: eq(categories.id, job.categoryId),
+      }),
+    ]);
+    if (!worker || !client) return;
+    await this.db
+      .insert(placements)
+      .values({
+        workerId: worker.id,
+        candidateName: [worker.firstName, worker.lastName]
+          .filter(Boolean)
+          .join(' '),
+        clientId: client.id,
+        companyName: client.companyName || client.name,
+        position: category?.name ?? job.title,
+        projectName: job.title,
+        location: job.location,
+        startDate: indiaDate(job.startsAt),
+        monthlyRemuneration:
+          job.rateUnit === 'month' ? application.proposedRate : null,
+        applicationId: application.id,
+        notes:
+          'Recorded automatically when the client accepted the application.',
+      })
+      .onConflictDoNothing({ target: placements.applicationId });
+    await this.db
+      .update(workerProfiles)
+      .set({ pipelineStatus: 'placed', updatedAt: new Date() })
+      .where(eq(workerProfiles.id, worker.id));
   }
 
   async withdraw(userId: string, applicationId: string) {
