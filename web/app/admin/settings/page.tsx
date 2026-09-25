@@ -5,6 +5,7 @@ import { AdminShell, ErrorNote, SmallButton } from '@/components/admin/admin-she
 import { ConfirmDialog } from '@/components/admin/confirm-dialog';
 import { apiFetch } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
+import { PhoneField } from '@/components/phone-field';
 import { formatDate, useAdminApi, useAdminQuery, type AdminUser } from '@/lib/admin';
 
 const inputCls =
@@ -109,7 +110,7 @@ export default function SettingsPage() {
             <h3 className="text-sm font-semibold text-ink">Add an admin</h3>
             <label className="block text-sm text-body">
               Phone (used to log in)
-              <input required type="tel" pattern="\+?[0-9]{7,15}" placeholder="+919000000000" className={inputCls} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              <PhoneField required className={inputCls} value={form.phone} onChange={(phone) => setForm({ ...form, phone })} />
             </label>
             <label className="block text-sm text-body">
               Email (optional)
@@ -131,7 +132,7 @@ export default function SettingsPage() {
           <form onSubmit={changePassword} className="mt-3 space-y-3" aria-label="Change password">
             <label className="block text-sm text-body">
               Current password
-              <input required type="password" autoComplete="current-password" className={inputCls} value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} />
+              <input required type="password" maxLength={72} autoComplete="current-password" className={inputCls} value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} />
             </label>
             <label className="block text-sm text-body">
               New password (8+ characters)

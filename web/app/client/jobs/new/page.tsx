@@ -83,7 +83,7 @@ function NewJobForm() {
       <Card className="mt-6 p-6">
         <form onSubmit={handleSubmit} className="space-y-5">
           <Field label="Title">
-            <TextInput required value={form.title} onChange={(e) => update('title', e.target.value)} />
+            <TextInput required maxLength={255} value={form.title} onChange={(e) => update('title', e.target.value)} />
           </Field>
 
           <Field label="Position">
@@ -104,11 +104,11 @@ function NewJobForm() {
           </Field>
 
           <Field label="Location">
-            <TextInput required value={form.location} onChange={(e) => update('location', e.target.value)} />
+            <TextInput required maxLength={255} value={form.location} onChange={(e) => update('location', e.target.value)} />
           </Field>
 
           <Field label="Description">
-            <Textarea value={form.description} onChange={(e) => update('description', e.target.value)} rows={3} />
+            <Textarea maxLength={5000} value={form.description} onChange={(e) => update('description', e.target.value)} rows={3} />
           </Field>
 
           <div className="grid grid-cols-2 gap-4">
@@ -117,7 +117,7 @@ function NewJobForm() {
                 type="number"
                 min={1}
                 value={form.workersRequired}
-                onChange={(e) => update('workersRequired', e.target.value)}
+                onChange={(e) => update('workersRequired', e.target.value.slice(0, 4))}
               />
             </Field>
             <Field label="Starts at">
@@ -137,7 +137,7 @@ function NewJobForm() {
                 required
                 min={0}
                 value={form.offeredRate}
-                onChange={(e) => update('offeredRate', e.target.value)}
+                onChange={(e) => update('offeredRate', e.target.value.slice(0, 12))}
               />
             </Field>
             <Field label="Per">

@@ -130,11 +130,11 @@ function JobsBrowser() {
                         type="number"
                         min={0}
                         value={proposedRate}
-                        onChange={(e) => setProposedRate(e.target.value)}
+                        onChange={(e) => setProposedRate(e.target.value.slice(0, 12))}
                       />
                     </Field>
                     <Field label="Message (optional)">
-                      <Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2} />
+                      <Textarea maxLength={1000} value={message} onChange={(e) => setMessage(e.target.value)} rows={2} />
                     </Field>
                     <Button onClick={() => apply(job.id)} disabled={!proposedRate}>
                       Submit application

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
+import { PhoneField } from '@/components/phone-field';
 import { Button, Card, Eyebrow, Field, Select, TextInput } from '@/components/ui';
 
 export default function RegisterClientPage() {
@@ -57,7 +58,7 @@ export default function RegisterClientPage() {
       <Card className="mt-6 p-6">
         <form onSubmit={handleSubmit} className="space-y-5">
           <Field label="Your name">
-            <TextInput required value={form.name} onChange={(e) => update('name', e.target.value)} />
+            <TextInput required maxLength={150} value={form.name} onChange={(e) => update('name', e.target.value)} />
           </Field>
 
           <Field label="Account type">
@@ -72,22 +73,16 @@ export default function RegisterClientPage() {
 
           {form.clientType === 'company' && (
             <Field label="Company name">
-              <TextInput value={form.companyName} onChange={(e) => update('companyName', e.target.value)} />
+              <TextInput maxLength={255} value={form.companyName} onChange={(e) => update('companyName', e.target.value)} />
             </Field>
           )}
 
           <Field label="Phone number">
-            <TextInput
-              type="tel"
-              required
-              placeholder="+919000000000"
-              value={form.phone}
-              onChange={(e) => update('phone', e.target.value)}
-            />
+            <PhoneField required value={form.phone} onChange={(phone) => update('phone', phone)} />
           </Field>
 
           <Field label="Email">
-            <TextInput type="email" required value={form.email} onChange={(e) => update('email', e.target.value)} />
+            <TextInput type="email" required maxLength={255} value={form.email} onChange={(e) => update('email', e.target.value)} />
           </Field>
 
           <Field label="Password">
@@ -95,13 +90,14 @@ export default function RegisterClientPage() {
               type="password"
               required
               minLength={8}
+              maxLength={72}
               value={form.password}
               onChange={(e) => update('password', e.target.value)}
             />
           </Field>
 
           <Field label="City">
-            <TextInput value={form.city} onChange={(e) => update('city', e.target.value)} />
+            <TextInput maxLength={100} value={form.city} onChange={(e) => update('city', e.target.value)} />
           </Field>
 
           {error && <p className="text-sm text-warn">{error}</p>}

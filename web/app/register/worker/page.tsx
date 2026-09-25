@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
+import { PhoneField } from '@/components/phone-field';
 import { apiFetch } from '@/lib/api';
 import {
   BACKGROUND_LABELS,
@@ -120,25 +121,19 @@ export default function RegisterWorkerPage() {
           <SectionTitle>About you</SectionTitle>
           <div className="grid grid-cols-2 gap-4">
             <Field label="First name">
-              <TextInput required value={form.firstName} onChange={(e) => update('firstName', e.target.value)} />
+              <TextInput required maxLength={100} value={form.firstName} onChange={(e) => update('firstName', e.target.value)} />
             </Field>
             <Field label="Last name">
-              <TextInput value={form.lastName} onChange={(e) => update('lastName', e.target.value)} />
+              <TextInput maxLength={100} value={form.lastName} onChange={(e) => update('lastName', e.target.value)} />
             </Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Phone number">
-              <TextInput
-                type="tel"
-                required
-                placeholder="+919000000000"
-                value={form.phone}
-                onChange={(e) => update('phone', e.target.value)}
-              />
+              <PhoneField required value={form.phone} onChange={(phone) => update('phone', phone)} />
             </Field>
             <Field label="Email">
-              <TextInput type="email" required value={form.email} onChange={(e) => update('email', e.target.value)} />
+              <TextInput type="email" required maxLength={255} value={form.email} onChange={(e) => update('email', e.target.value)} />
             </Field>
           </div>
 
@@ -147,13 +142,14 @@ export default function RegisterWorkerPage() {
               type="password"
               required
               minLength={8}
+              maxLength={72}
               value={form.password}
               onChange={(e) => update('password', e.target.value)}
             />
           </Field>
 
           <Field label="City">
-            <TextInput value={form.city} onChange={(e) => update('city', e.target.value)} />
+            <TextInput maxLength={100} value={form.city} onChange={(e) => update('city', e.target.value)} />
           </Field>
 
           <SectionTitle>Your experience</SectionTitle>
@@ -221,6 +217,7 @@ export default function RegisterWorkerPage() {
               <TextInput
                 required
                 placeholder="e.g. B.E. Civil"
+                maxLength={255}
                 value={form.qualification}
                 onChange={(e) => update('qualification', e.target.value)}
               />
@@ -232,7 +229,7 @@ export default function RegisterWorkerPage() {
                 min={0}
                 max={70}
                 value={form.yearsExperience}
-                onChange={(e) => update('yearsExperience', e.target.value)}
+                onChange={(e) => update('yearsExperience', e.target.value.slice(0, 2))}
               />
             </Field>
           </div>
@@ -241,6 +238,7 @@ export default function RegisterWorkerPage() {
             <Field label={retired ? 'Designation at retirement' : 'Current / last designation'}>
               <TextInput
                 placeholder={retired ? 'e.g. Chief Engineer' : 'e.g. Senior Bridge Engineer'}
+                maxLength={255}
                 value={form.lastDesignation}
                 onChange={(e) => update('lastDesignation', e.target.value)}
               />
@@ -248,6 +246,7 @@ export default function RegisterWorkerPage() {
             <Field label={retired ? 'Railway zone / organisation' : 'Current / last employer'}>
               <TextInput
                 placeholder={retired ? 'e.g. Southern Railway' : ''}
+                maxLength={255}
                 value={form.lastOrganisation}
                 onChange={(e) => update('lastOrganisation', e.target.value)}
               />
@@ -262,7 +261,7 @@ export default function RegisterWorkerPage() {
                   min={1970}
                   max={new Date().getFullYear()}
                   value={form.retirementYear}
-                  onChange={(e) => update('retirementYear', e.target.value)}
+                  onChange={(e) => update('retirementYear', e.target.value.slice(0, 4))}
                 />
               </Field>
             )}
@@ -272,7 +271,7 @@ export default function RegisterWorkerPage() {
                 required
                 min={0}
                 value={form.minRate}
-                onChange={(e) => update('minRate', e.target.value)}
+                onChange={(e) => update('minRate', e.target.value.slice(0, 12))}
               />
             </Field>
           </div>
