@@ -1,5 +1,10 @@
 # Deploying for free
 
+> **Moving to AWS Lightsail:** the paid, always-on setup (one server plus a
+> managed database, $27/month) is in
+> [`deploy/lightsail/README.md`](deploy/lightsail/README.md). This file
+> describes the free Render + Supabase setup that runs today.
+
 ## Live deployment
 
 | | |

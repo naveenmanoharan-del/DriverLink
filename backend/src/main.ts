@@ -34,7 +34,10 @@ async function bootstrap() {
     credentials: true,
   });
   const port = process.env.PORT ?? 3000;
-  await app.listen(port);
+  // HOST=127.0.0.1 behind a local reverse proxy (see deploy/lightsail); unset listens everywhere.
+  const host = process.env.HOST?.trim();
+  if (host) await app.listen(port, host);
+  else await app.listen(port);
   console.log(`Manpower API listening on http://localhost:${port}/api`);
 }
 void bootstrap();
