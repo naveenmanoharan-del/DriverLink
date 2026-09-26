@@ -54,7 +54,7 @@ export default function HomePage() {
           <Reveal>
             <Eyebrow>About us</Eyebrow>
             <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl">
-              CVs that meet the RFP, from people who have done the work.
+              CVs that meet the requirement, from people who have done the work.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-body">
               Construction projects and bids are won and lost on key personnel. We maintain a register of
@@ -90,7 +90,7 @@ export default function HomePage() {
             {[
               {
                 title: 'Bid-ready CVs',
-                body: 'Qualifications, experience and last postings captured up front, so matching a CV to the RFP criteria is quick.',
+                body: 'Qualifications, experience and last postings captured up front, so matching a CV to the requirement is quick.',
               },
               {
                 title: 'Retired government expertise',
