@@ -31,6 +31,7 @@ export const BACKGROUNDS = [
   'retired_railway',
   'retired_govt',
   'private_sector',
+  'fresher',
 ] as const;
 
 /**

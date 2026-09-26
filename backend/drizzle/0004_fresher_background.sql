@@ -1,0 +1,1 @@
+ALTER TYPE "public"."worker_background" ADD VALUE 'fresher';

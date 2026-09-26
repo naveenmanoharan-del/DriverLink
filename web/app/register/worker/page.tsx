@@ -67,6 +67,7 @@ export default function RegisterWorkerPage() {
   }
 
   const retired = form.background === 'retired_railway' || form.background === 'retired_govt';
+  const fresher = form.background === 'fresher';
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -175,7 +176,11 @@ export default function RegisterWorkerPage() {
             <Select
               required
               value={form.background}
-              onChange={(e) => update('background', e.target.value as Background)}
+              onChange={(e) => {
+                const background = e.target.value as Background;
+                // A fresher has no past experience to describe, so start them at zero years.
+                setForm((f) => ({ ...f, background, ...(background === 'fresher' ? { yearsExperience: '0' } : {}) }));
+              }}
             >
               <option value="" disabled>
                 Select your background
@@ -235,6 +240,7 @@ export default function RegisterWorkerPage() {
             </Field>
           </div>
 
+          {!fresher && (
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={retired ? 'Designation at retirement' : 'Current / last designation'}>
               <TextInput
@@ -253,6 +259,7 @@ export default function RegisterWorkerPage() {
               />
             </Field>
           </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             {retired && (

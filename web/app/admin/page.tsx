@@ -29,6 +29,7 @@ const SHORT_BACKGROUND: Record<string, string> = {
   retired_railway: 'Retired railway',
   retired_govt: 'Retired govt / PSU',
   private_sector: 'Private sector',
+  fresher: 'Fresher',
   unspecified: 'Not stated',
 };
 

@@ -34,6 +34,7 @@ export const workerBackground = pgEnum('worker_background', [
   'retired_railway',
   'retired_govt',
   'private_sector',
+  'fresher',
 ]);
 export const workerAvailability = pgEnum('worker_availability', [
   'offline',

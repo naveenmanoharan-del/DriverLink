@@ -38,6 +38,7 @@ const BACKGROUND_LABELS: Record<string, string> = {
   retired_railway: 'Retired railway',
   retired_govt: 'Retired govt/PSU',
   private_sector: 'Private sector',
+  fresher: 'Fresher',
 };
 
 @Controller('v1/admin')

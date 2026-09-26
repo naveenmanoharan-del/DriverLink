@@ -33,6 +33,7 @@ const BACKGROUND_LABELS: Record<string, string> = {
   retired_railway: 'Retired from Railways',
   retired_govt: 'Retired from other Govt / PSU',
   private_sector: 'Private sector',
+  fresher: 'Fresher / recent graduate',
 };
 
 type Role = 'worker' | 'client' | 'admin';

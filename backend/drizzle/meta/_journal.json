@@ -29,6 +29,13 @@
       "when": 1790282454891,
       "tag": "0003_admin_placements_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790407600307,
+      "tag": "0004_fresher_background",
+      "breakpoints": true
     }
   ]
 }
