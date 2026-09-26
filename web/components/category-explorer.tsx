@@ -63,7 +63,7 @@ export function CategoryExplorer() {
             }`}
           />
         ))}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent p-6 pt-16">
+        <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-ink/80 via-ink/10 to-transparent p-6 pt-16">
           {/* Keyed so the caption re-runs its fade on every tab change. */}
           <div key={current.label} className="animate-fade-up">
             <p className="text-lg font-semibold text-white">{current.label}</p>

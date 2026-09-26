@@ -32,7 +32,7 @@ const BUTTON_VARIANTS = {
   // Every variant sets exactly one border colour: the base class adds a 1px border to all of them,
   // so solid and outline buttons come out the same height side by side.
   primary: 'border-transparent bg-accent text-white hover:bg-accent-dark',
-  secondary: 'border-ink/15 text-ink hover:bg-bg-soft',
+  secondary: 'border-accent text-accent hover:bg-navy-tint',
   // For use on photos / colored panels, where a solid accent button wouldn't have enough contrast.
   // Each is a fully self-contained color combo — never override bg/text color via `className` on
   // Button, since Tailwind's cascade order (not JSX class order) decides which of two conflicting
@@ -40,7 +40,7 @@ const BUTTON_VARIANTS = {
   onDark: 'border-transparent bg-white text-ink hover:bg-white/90',
   onDarkOutline: 'border-white/40 text-white hover:bg-white/10',
   onAccentPanel: 'border-transparent bg-white text-accent-dark hover:bg-white/90',
-  onTealPanel: 'border-transparent bg-white text-teal-dark hover:bg-white/90',
+  onNavyPanel: 'border-transparent bg-white text-accent hover:bg-white/90',
 } as const;
 
 export function Button({
@@ -52,7 +52,7 @@ export function Button({
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: keyof typeof BUTTON_VARIANTS; arrow?: boolean }) {
   // `group` lets the arrow react to hover on the button as a whole.
   const base =
-    'group inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold ' +
+    'group inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-medium ' +
     'transition-[background-color,border-color,color,transform,box-shadow] duration-200 ease-out ' +
     'hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(22,24,29,0.12)] active:translate-y-0 active:shadow-none ' +
     'disabled:opacity-40 disabled:pointer-events-none disabled:hover:translate-y-0 disabled:hover:shadow-none';
@@ -97,7 +97,7 @@ export function Card({
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
     <p className="flex items-center gap-2 text-sm text-body">
-      <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+      <span className="h-1.5 w-1.5 rounded-full bg-amber" />
       {children}
     </p>
   );

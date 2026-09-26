@@ -5,26 +5,27 @@
  *
  * Run with `npm run check:contrast`. Exits non-zero on any failure.
  *
- * These values are duplicated from two places and must be kept in step with
- * them — there is no shared source of truth across the web and Flutter apps:
- *   - web/app/globals.css       (@theme tokens)
- *   - mobile/lib/theme.dart     (AppColors)
+ * These values are duplicated from the brand kit and must be kept in step with
+ * it — there is no shared source of truth across the web and Flutter apps:
+ *   - web/app/brand.css         (--ys-* tokens, mapped in globals.css @theme)
+ *   - mobile/lib/theme.dart     (AppColors, still on the old palette)
  *
- * The accent and teal in particular were darkened specifically to clear 4.5:1
- * with white text; lightening them again will fail this check.
+ * Amber is deliberately absent as a text colour on white (2.2:1): it is only
+ * used for decorative marks there, and as text or focus rings on navy.
  */
 const T = {
-  ink: '#16181d',
-  body: '#55596b',
-  bgSoft: '#f6f5f8',
-  accent: '#806da5',
-  accentDark: '#6f5c93',
+  ink: '#1D232B',
+  body: '#5B6470',
+  bgSoft: '#F7F8FA',
+  accent: '#13294B', // Rail Navy
+  accentDark: '#0C1B31',
+  navyTint: '#EEF0F2',
+  amber: '#E9A23B', // Signal Amber
   teal: '#1e847d',
   tealDark: '#166860',
-  line: '#e6e4ec',
+  line: '#E3E6EA',
   warn: '#b3492f',
   white: '#ffffff',
-  black: '#000000',
 };
 
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -48,19 +49,20 @@ const cases = [
   ['body text on white', T.body, T.white, 1, false],
   ['body text on bg-soft', T.body, T.bgSoft, 1, false],
   ['ink heading on white', T.ink, T.white, 1, false],
-  ['white on accent (primary button)', T.white, T.accent, 1, false],
-  ['white on accent-dark (button hover)', T.white, T.accentDark, 1, false],
-  ['white on teal (panel)', T.white, T.teal, 1, false],
-  ['accent-dark link on white', T.accentDark, T.white, 1, false],
-  ['teal-dark on white', T.tealDark, T.white, 1, false],
+  ['white on navy (primary button)', T.white, T.accent, 1, false],
+  ['white on navy-dark (button hover)', T.white, T.accentDark, 1, false],
+  ['navy on white (outline button, links)', T.accent, T.white, 1, false],
+  ['navy on navy-tint (outline hover)', T.accent, T.navyTint, 1, false],
+  ['navy-dark on white (panel button)', T.accentDark, T.white, 1, false],
+  ['teal-dark (success) on white', T.tealDark, T.white, 1, false],
   ['warn (error) on white', T.warn, T.white, 1, false],
-  ['footer body: white/70 on black', T.white, T.black, 0.7, false],
-  ['footer legal: white/50 on black', T.white, T.black, 0.5, false],
-  ['footer heading: white on black', T.white, T.black, 1, false],
+  ['footer body: white/70 on navy', T.white, T.accent, 0.7, false],
+  ['footer legal: white/50 on navy', T.white, T.accent, 0.5, false],
+  ['footer heading: white on navy', T.white, T.accent, 1, false],
   ['hero subhead: white on ink overlay', T.white, T.ink, 1, false],
-  ['panel body: white on accent', T.white, T.accent, 1, false],
-  ['panel eyebrow: white on accent', T.white, T.accent, 1, false],
-  ['panel eyebrow: white on teal', T.white, T.teal, 1, false],
+  ['panel text: white on navy', T.white, T.accent, 1, false],
+  ['panel text: white on navy-dark', T.white, T.accentDark, 1, false],
+  ['amber (focus ring/icons) on navy', T.amber, T.accent, 1, false],
   ['placeholder: body on white', T.body, T.white, 1, false],
   ['nav phone: body on white', T.body, T.white, 1, false],
 ];

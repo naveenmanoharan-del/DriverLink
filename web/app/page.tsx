@@ -15,7 +15,7 @@ export default function HomePage() {
           // Slow drift keeps the hero alive without competing with the copy.
           className="h-full w-full animate-fade-in object-cover motion-safe:animate-[fade-in_1.2s_ease-out_both]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/25 to-ink/10" />
+        <div className="absolute inset-0 bg-linear-to-t from-ink/90 via-ink/50 to-ink/10" />
         <div className="absolute inset-x-0 bottom-0 px-4 pb-14">
           <div className="mx-auto max-w-5xl">
             {/* Staggered entrance: headline, body, then the actions. */}
@@ -127,7 +127,7 @@ export default function HomePage() {
       {/* Final CTA */}
       <section className="mx-auto max-w-5xl px-4 pb-24">
         <Reveal className="grid gap-px overflow-hidden rounded-3xl border border-line bg-line sm:grid-cols-2">
-          <div className="flex flex-col bg-accent p-10 text-white">
+          <div className="on-navy flex flex-col bg-accent p-10 text-white">
             <p className="text-sm text-white">For contractors &amp; consultants</p>
             <h3 className="mt-2 text-2xl font-bold">Tell us the positions you need</h3>
             <p className="mt-3 text-[15px] text-white">
@@ -138,12 +138,12 @@ export default function HomePage() {
               <Button variant="onAccentPanel">Hire for a contract</Button>
             </Link>
           </div>
-          <div className="flex flex-col bg-teal p-10 text-white">
+          <div className="on-navy flex flex-col bg-accent-dark p-10 text-white">
             <p className="text-sm text-white">For professionals</p>
             <h3 className="mt-2 text-2xl font-bold">Retired or serving, put your experience to work</h3>
             <p className="mt-3 text-[15px] text-white">Register once, upload your CV, and we&apos;ll contact you when a contract fits.</p>
             <Link href="/register/worker" className="mt-auto self-start pt-6">
-              <Button variant="onTealPanel">Submit your CV</Button>
+              <Button variant="onNavyPanel">Submit your CV</Button>
             </Link>
           </div>
         </Reveal>

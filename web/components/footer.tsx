@@ -13,18 +13,19 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-black text-white">
+    <footer className="on-navy bg-accent text-white">
       <div className="mx-auto max-w-5xl px-4 py-16">
         <div className="grid gap-10 sm:grid-cols-3">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">
-                Y
-              </span>
-              <span className="text-[15px] font-bold tracking-tight text-white">
-                <HighlightText>Yukti Solutions</HighlightText>
-              </span>
-            </div>
+            {/* Reverse lockup: the full-colour logo is for light backgrounds only. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/brand/yukti-logo-horizontal-reverse.svg"
+              alt="Yukti Solutions"
+              width={144}
+              height={44}
+              className="h-11 w-auto"
+            />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/70">
               Key personnel, engineers and office staff for construction and infrastructure projects.
             </p>

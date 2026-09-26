@@ -1,0 +1,46 @@
+/* Yukti Solutions: website brand tokens (logo: Junction)
+   Load once, globally. Map the site's existing colour and font roles onto these
+   variables rather than hard-coding hex values. Rules: README-FOR-CLAUDE-CODE.md */
+
+:root {
+  /* Core brand colours */
+  --ys-navy: #13294B;        /* primary: headings, links, primary buttons, header/footer backgrounds */
+  --ys-amber: #E9A23B;       /* accent: highlights, rules, icons; amber buttons take navy text */
+
+  /* Supporting shades */
+  --ys-navy-dark: #0C1B31;   /* hover/active state for navy buttons and links */
+  --ys-navy-tint: #EEF0F2;   /* light section background */
+  --ys-amber-dark: #CD8F34;  /* hover/active state for amber buttons (keep navy text) */
+  --ys-amber-tint: #FCF2E4;  /* soft highlight background */
+
+  /* Neutrals */
+  --ys-ink: #1D232B;         /* body text */
+  --ys-muted: #5B6470;       /* secondary text and captions (6.0:1 on white) */
+  --ys-border: #E3E6EA;      /* dividers and card borders (decorative only) */
+  --ys-surface: #F7F8FA;     /* alternate section background */
+  --ys-white: #FFFFFF;
+
+  /* Type */
+  --ys-font: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --ys-weight-regular: 400;  /* body */
+  --ys-weight-medium: 500;   /* nav, buttons, labels */
+  --ys-weight-semibold: 600; /* headings */
+
+  /* Logo */
+  --ys-logo-height: 48px;         /* desktop header */
+  --ys-logo-height-mobile: 44px;  /* minimum for the horizontal logo is 43px tall (140px wide) */
+}
+
+/* Optional helper for the header logo <img>. Keep width/height attributes on the <img>
+   (they reserve space and prevent layout shift); CSS sets the displayed height. */
+.ys-logo {
+  display: block;
+  height: var(--ys-logo-height);
+  width: auto;
+}
+
+@media (max-width: 480px) {
+  .ys-logo {
+    height: var(--ys-logo-height-mobile);
+  }
+}
