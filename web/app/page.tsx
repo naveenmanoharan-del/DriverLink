@@ -127,21 +127,22 @@ export default function HomePage() {
       {/* Final CTA */}
       <section className="mx-auto max-w-5xl px-4 pb-24">
         <Reveal className="grid gap-px overflow-hidden rounded-3xl border border-line bg-line sm:grid-cols-2">
-          <div className="bg-accent p-10 text-white">
+          <div className="flex flex-col bg-accent p-10 text-white">
             <p className="text-sm text-white">For contractors &amp; consultants</p>
             <h3 className="mt-2 text-2xl font-bold">Tell us the positions you need</h3>
             <p className="mt-3 text-[15px] text-white">
               Post the role, location and remuneration. We put forward candidates who fit the requirement.
             </p>
-            <Link href="/register/client" className="mt-6 inline-block">
+            {/* mt-auto pins both panel buttons to the bottom edge so they line up whatever the copy length. */}
+            <Link href="/register/client" className="mt-auto self-start pt-6">
               <Button variant="onAccentPanel">Hire for a contract</Button>
             </Link>
           </div>
-          <div className="bg-teal p-10 text-white">
+          <div className="flex flex-col bg-teal p-10 text-white">
             <p className="text-sm text-white">For professionals</p>
             <h3 className="mt-2 text-2xl font-bold">Retired or serving, put your experience to work</h3>
             <p className="mt-3 text-[15px] text-white">Register once, upload your CV, and we&apos;ll contact you when a contract fits.</p>
-            <Link href="/register/worker" className="mt-6 inline-block">
+            <Link href="/register/worker" className="mt-auto self-start pt-6">
               <Button variant="onTealPanel">Submit your CV</Button>
             </Link>
           </div>
