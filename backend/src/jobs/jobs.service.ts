@@ -2,23 +2,32 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { DATABASE } from '../database/database.module';
 import type { Database } from '../database/database.module';
 import {
+  categories,
   clientProfiles,
   jobApplications,
   jobs,
+  users,
   workerProfiles,
 } from '../database/schema';
+import { detailsTable, MailService } from '../mail/mail.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobStatusDto } from './dto/update-job-status.dto';
 
 @Injectable()
 export class JobsService {
-  constructor(@Inject(DATABASE) private readonly db: Database) {}
+  private readonly logger = new Logger(JobsService.name);
+
+  constructor(
+    @Inject(DATABASE) private readonly db: Database,
+    private readonly mail: MailService,
+  ) {}
 
   private async clientIdForUser(userId: string): Promise<string> {
     const client = await this.db.query.clientProfiles.findFirst({
@@ -47,7 +56,51 @@ export class JobsService {
         endsAt: dto.endsAt ? new Date(dto.endsAt) : undefined,
       })
       .returning();
+    // Not awaited: posting shouldn't wait on the mail provider, and a mail
+    // failure must not undo a saved requirement.
+    void this.notifyJobPosted(userId, job);
     return job;
+  }
+
+  /** Emails the owner every new requirement, with who posted it and how to reach them. */
+  private async notifyJobPosted(userId: string, job: typeof jobs.$inferSelect) {
+    try {
+      const [client, user, category] = await Promise.all([
+        this.db.query.clientProfiles.findFirst({
+          where: eq(clientProfiles.userId, userId),
+        }),
+        this.db.query.users.findFirst({ where: eq(users.id, userId) }),
+        this.db.query.categories.findFirst({
+          where: eq(categories.id, job.categoryId),
+        }),
+      ]);
+      const who = client?.companyName || client?.name || 'a client';
+      await this.mail.notifyAdmin(
+        `New job requirement: ${job.title} - ${who}`,
+        `<p style="font-family:sans-serif">A client posted a new requirement on Yukti Solutions.</p>` +
+          detailsTable([
+            ['Position', job.title],
+            ['Role', category?.name],
+            ['Location', job.location],
+            ['Positions', job.workersRequired],
+            [
+              'Offered rate',
+              `${job.currency} ${job.offeredRate} / ${job.rateUnit}`,
+            ],
+            ['Starts', job.startsAt.toISOString().slice(0, 10)],
+            ['Ends', job.endsAt?.toISOString().slice(0, 10)],
+            ['Description', job.description],
+            ['Client', client?.name],
+            ['Company', client?.companyName],
+            ['Phone', user?.phone],
+            ['Email', user?.email],
+            ['City', client?.city],
+          ]),
+      );
+    } catch (err) {
+      // notifyAdmin already logs send failures; this covers the lookups.
+      this.logger.warn(`Job ${job.id}: notification skipped: ${String(err)}`);
+    }
   }
 
   async findMine(userId: string) {
