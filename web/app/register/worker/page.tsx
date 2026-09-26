@@ -114,7 +114,7 @@ export default function RegisterWorkerPage() {
       <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">Submit your CV</h1>
       <p className="mt-1 text-sm text-body">
         For construction and infrastructure projects — consultancy, EPC and contracting roles across railways,
-        metro, highways, buildings, industrial, water and power. Retired government and railway officers are
+        metro, highways, buildings and industrial. Retired government and railway officers are
         especially welcome.
       </p>
 

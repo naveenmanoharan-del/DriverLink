@@ -30,8 +30,8 @@ export default function HomePage() {
               style={{ '--delay': '340ms' } as React.CSSProperties}
             >
               Yukti Solutions supplies experts, engineers and office staff to contractors, consultants and
-              developers across the construction industry — infrastructure, buildings, industrial, water and
-              power projects — including experienced retired government and railway officers.
+              developers across the construction industry — infrastructure, buildings and industrial
+              projects — including experienced retired professionals.
             </p>
             <div
               className="mt-8 flex animate-fade-up flex-wrap gap-4"
@@ -60,7 +60,7 @@ export default function HomePage() {
               Construction projects are won and lost on key personnel. We maintain a register of
               project managers, resident engineers, structural, geotechnical, MEP, planning, QA/QC and safety
               experts, and the site-office staff behind them — serving and retired professionals from
-              contractors, consultancies, Indian Railways, NHAI, CPWD, state PWDs and PSUs — with CVs ready for
+              contractors, consultancies, railways, highways, CPWD, state PWDs and PSUs — with CVs ready for
               your technical proposal or your site.
             </p>
             <Link href="/register/client" className="mt-6 inline-block">
@@ -86,19 +86,15 @@ export default function HomePage() {
           <Reveal>
             <Eyebrow>Why Yukti Solutions</Eyebrow>
           </Reveal>
-          <div className="mt-10 grid gap-8 sm:grid-cols-3">
+          <div className="mt-10 grid gap-8 sm:grid-cols-2">
             {[
               {
                 title: 'Project-ready CVs',
                 body: 'Qualifications, experience and last postings captured up front, so matching a CV to the requirement is quick.',
               },
               {
-                title: 'Retired government expertise',
-                body: 'Engineers and officers retired from Indian Railways, NHAI, CPWD, state PWDs and PSUs bring decades of field experience.',
-              },
-              {
-                title: 'Across construction',
-                body: 'One register for railways, metro, highways, buildings, industrial, water and power projects — consultancy, EPC and contracting roles alike.',
+                title: 'Retired professional expertise',
+                body: 'Retired professionals from railways, highways and across the construction industry bring decades of field experience.',
               },
             ].map((v, i) => (
               // Stagger left-to-right so the row resolves as one gesture.
@@ -116,7 +112,7 @@ export default function HomePage() {
         <Reveal>
           <Eyebrow>Who&apos;s on the register</Eyebrow>
           <h2 className="mt-4 max-w-lg text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl">
-            From team leader to site office.
+            From top to bottom.
           </h2>
         </Reveal>
         <Reveal delay={120} className="mt-10">

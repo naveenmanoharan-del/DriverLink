@@ -56,7 +56,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col gap-2 border-t border-white/15 pt-6 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} Yukti Solutions. All rights reserved.</p>
-          <p>Infrastructure · Buildings · Industrial · Water · Power</p>
+          <p>Infrastructure · Buildings · Industrial</p>
         </div>
       </div>
     </footer>

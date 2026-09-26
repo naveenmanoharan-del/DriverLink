@@ -20,9 +20,9 @@ const CATEGORIES = [
     description: 'Office managers, accountants, document controllers, store keepers, HR, computer operators and stenographers for the project office.',
   },
   {
-    label: 'Retired government officers',
+    label: 'Retired professionals',
     image: 'https://images.unsplash.com/photo-1637995735729-c43250f1ef47?w=1000&q=80',
-    description: 'Engineers and officers retired from Indian Railways, NHAI, CPWD, state PWDs and PSUs such as RVNL, IRCON and RITES — decades of field experience, available for project roles.',
+    description: 'Experienced professionals retired from railways, highways and across the construction industry — decades of field experience, available for project roles.',
   },
 ];
 

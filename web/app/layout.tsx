@@ -12,7 +12,7 @@ const poppins = Poppins({
 });
 
 const description =
-  'Key personnel, engineers and office staff for construction and infrastructure projects — railways, metro, highways, buildings, industrial, water and power — including retired government and railway officers.';
+  'Key personnel, engineers and office staff for construction and infrastructure projects — railways, metro, highways, buildings and industrial — including retired government and railway officers.';
 
 // Icons come from the app/ file conventions (favicon.ico, icon.svg, apple-icon.png).
 export const metadata: Metadata = {
