@@ -7,7 +7,7 @@ const CATEGORIES = [
     label: 'Key personnel',
     image: 'https://images.unsplash.com/photo-1694521787193-9293daeddbaa?w=1000&q=80',
     description:
-      'Team leaders, project managers, resident engineers, and structural, geotechnical, highway, track, MEP, planning, contracts, QA/QC and safety experts for your bid or project.',
+      'Team leaders, project managers, resident engineers, and structural, geotechnical, highway, track, MEP, planning, contracts, QA/QC and safety experts for your project.',
   },
   {
     label: 'Engineers & technical staff',

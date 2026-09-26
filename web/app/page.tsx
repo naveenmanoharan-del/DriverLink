@@ -57,14 +57,14 @@ export default function HomePage() {
               CVs that meet the requirement, from people who have done the work.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-body">
-              Construction projects and bids are won and lost on key personnel. We maintain a register of
+              Construction projects are won and lost on key personnel. We maintain a register of
               project managers, resident engineers, structural, geotechnical, MEP, planning, QA/QC and safety
               experts, and the site-office staff behind them — serving and retired professionals from
               contractors, consultancies, Indian Railways, NHAI, CPWD, state PWDs and PSUs — with CVs ready for
               your technical proposal or your site.
             </p>
             <Link href="/register/client" className="mt-6 inline-block">
-              <Button>Source personnel for a bid</Button>
+              <Button>Source personnel for a project</Button>
             </Link>
           </Reveal>
           <Reveal delay={140}>
@@ -89,7 +89,7 @@ export default function HomePage() {
           <div className="mt-10 grid gap-8 sm:grid-cols-3">
             {[
               {
-                title: 'Bid-ready CVs',
+                title: 'Project-ready CVs',
                 body: 'Qualifications, experience and last postings captured up front, so matching a CV to the requirement is quick.',
               },
               {

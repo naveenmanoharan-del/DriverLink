@@ -1,4 +1,4 @@
-const FOR_CLIENTS = ['Post a requirement', 'Key personnel for bids', 'Site office staffing'];
+const FOR_CLIENTS = ['Post a requirement', 'Key personnel for projects', 'Site office staffing'];
 const FOR_WORKERS = ['Submit your CV', 'Retired government officers', 'Construction & infrastructure roles'];
 
 function HighlightText({ children }: { children: string }) {
