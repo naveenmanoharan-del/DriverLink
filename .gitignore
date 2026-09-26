@@ -7,16 +7,9 @@ coverage/
 .env.local
 *.tsbuildinfo
 
-# Flutter / Dart
-mobile/.dart_tool/
-mobile/.flutter-plugins
-mobile/.flutter-plugins-dependencies
-mobile/.pub-cache/
-mobile/.pub/
-mobile/build/
-mobile/android/.gradle/
-mobile/android/local.properties
-mobile/ios/Flutter/.last_build_id
+# The Android app was discontinued and its source removed; this only hides any
+# leftover local build output in a mobile/ folder.
+mobile/
 
 # Dev server logs — noisy, machine-specific, and can contain request data.
 *devserver.log
@@ -25,8 +18,8 @@ mobile/ios/Flutter/.last_build_id
 # Local tooling state, not part of the project.
 .claude/
 
-# The pre-rewrite Laravel / NestJS codebase. Superseded by backend/, web/ and
-# mobile/, no longer builds, and kept on disk only for reference.
+# The pre-rewrite Laravel / NestJS codebase. Superseded by backend/ and web/,
+# no longer builds, and kept on disk only for reference.
 _archive_legacy/
 
 # OS cruft

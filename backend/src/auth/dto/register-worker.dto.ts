@@ -35,8 +35,8 @@ export const BACKGROUNDS = [
 ] as const;
 
 /**
- * Accepted both as JSON (the mobile app) and as multipart form data (the
- * website, which attaches a resume). Multipart fields all arrive as strings, so
+ * Accepted both as JSON and as multipart form data (the website, which
+ * attaches a resume). Multipart fields all arrive as strings, so
  * numbers are coerced with @Type and `sectors` may come as "railways,highways".
  */
 export class RegisterWorkerDto {

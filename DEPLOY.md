@@ -119,14 +119,13 @@ takes company email down with it.
 Render issues the TLS certificate automatically once the records resolve.
 
 
-The platform is three pieces. Only two of them need a host:
+The platform is three pieces:
 
 | Piece | Where | Why |
 |---|---|---|
 | PostgreSQL | **Supabase** | free, and data is not deleted when limits are hit |
 | NestJS API | **Render** | free Node service |
 | Next.js website | **Render** | free Node service |
-| Android app | nowhere | it's an APK you hand out; it just needs the API URL |
 
 Redis is not required — nothing in the codebase reads it.
 
@@ -204,25 +203,13 @@ not to disable verification.
 30–50 seconds to answer the first request afterwards. Fine for testing and
 demos; not what you want in front of a client cold.
 
-## 3. Android app
-
-Point it at the hosted API at build time:
-
-```bash
-flutter build apk --release \
-  --dart-define=API_BASE_URL=https://yukti-api.onrender.com/api
-```
-
-Release builds refuse cleartext HTTP, so the API must be HTTPS — Render provides
-that. Debug builds keep using `http://10.0.2.2:3000/api` for the emulator.
-
 ## Verifying a deployment
 
 ```bash
 API_URL=https://yukti-api.onrender.com/api npm run test:api
 ```
 
-Runs all 84 checks against the deployed server. It creates real accounts and
+Runs the end-to-end checks against the deployed server. It creates real accounts and
 jobs under timestamped phone numbers, so point it at a disposable database —
 never at production data you care about.
 

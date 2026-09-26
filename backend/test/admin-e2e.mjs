@@ -237,7 +237,7 @@ async function run() {
     method: 'POST',
     body: { phone: newPhone(), password: 'secret123', firstName: 'Json', categoryId: state.officeCategoryId, minRate: '20000', sectors: ['highways'] },
   });
-  check('JSON registration with a sectors array (mobile app)', jsonReg.status === 201 && jsonReg.data.profile.sectors[0] === 'highways', `got ${jsonReg.status}`);
+  check('JSON registration with a sectors array', jsonReg.status === 201 && jsonReg.data.profile.sectors[0] === 'highways', `got ${jsonReg.status}`);
   created.push(jsonReg.data.user.id);
   state.json = { profileId: jsonReg.data.profile.id, userId: jsonReg.data.user.id, token: jsonReg.data.accessToken };
 
@@ -427,24 +427,14 @@ async function run() {
   check('delete placement → 200', del.status === 200);
   check('deleting it again → 404', (await api(`/v1/admin/placements/${offPlatform.data.id}`, { method: 'DELETE', token: A })).status === 404);
 
-  section('Auto placement when a client accepts');
+  section('Client job requirements');
   const job = await api('/v1/jobs', {
     method: 'POST',
     token: state.client.token,
     body: { categoryId: state.officeCategoryId, title: 'Document Controller, DFC Pkg 3', location: 'Ahmedabad', offeredRate: '40000', rateUnit: 'month', startsAt: '2026-10-01T00:00:00.000Z' },
   });
   check('client posts a monthly job', job.status === 201, `got ${job.status} ${JSON.stringify(job.data).slice(0, 150)}`);
-  const app = await api(`/v1/jobs/${job.data.id}/applications`, { method: 'POST', token: state.json.token, body: { proposedRate: '38000', message: 'Interested' } });
-  check('candidate applies', app.status === 201, `got ${app.status}`);
-  const acc = await api(`/v1/applications/${app.data.id}`, { method: 'PATCH', token: state.client.token, body: { status: 'accepted' } });
-  check('client accepts', acc.status === 200, `got ${acc.status}`);
-  const auto = await api(`/v1/admin/placements?workerId=${state.json.profileId}`, { token: A });
-  const ap = auto.data.data[0];
-  check('a placement was recorded automatically', auto.data.total === 1, `total ${auto.data.total}`);
-  check('…under the client’s company', ap?.companyName === `Acme Consult ${stamp}` && ap?.clientId === state.client.profileId);
-  check('…with the monthly rate and start date', ap?.monthlyRemuneration === '38000.00' && ap?.startDate === '2026-10-01', JSON.stringify(ap));
-  await api(`/v1/applications/${app.data.id}`, { method: 'PATCH', token: state.client.token, body: { status: 'accepted' } });
-  check('accepting twice does not duplicate it', (await api(`/v1/admin/placements?workerId=${state.json.profileId}`, { token: A })).data.total === 1);
+  check('candidates cannot apply to it (404)', (await api(`/v1/jobs/${job.data.id}/applications`, { method: 'POST', token: state.json.token, body: { proposedRate: '38000' } })).status === 404);
 
   // ------------------------------------------------------------------
   section('Dashboard statistics');
@@ -507,9 +497,7 @@ async function run() {
 
   const delC = await api(`/v1/admin/users/${state.client.userId}`, { method: 'DELETE', token: A });
   check('delete client → 200', delC.status === 200);
-  check('their jobs are gone', (await api(`/v1/jobs/${job.data.id}`)).status === 404);
-  const autoAfter = await api(`/v1/admin/placements?workerId=${state.json.profileId}`, { token: A });
-  check('the auto placement survives with the company name', autoAfter.data.data[0]?.clientId === null && autoAfter.data.data[0]?.companyName === `Acme Consult ${stamp}`);
+  check('their jobs are gone', (await api(`/v1/admin/clients/${state.client.profileId}`, { token: A })).status === 404);
 
   // ------------------------------------------------------------------
   section('Admins and passwords');

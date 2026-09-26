@@ -1,8 +1,8 @@
 # Yukti Solutions — Architecture
 
 A manpower supply platform connecting **clients** (people/companies who need workers) with **workers**
-across every labour category: physical labour, drivers, artisans, and office staff. One shared backend
-serves both a website and an Android app.
+across every labour category: physical labour, drivers, artisans, and office staff. One backend serves
+the website. (There was an Android app; it has been discontinued and removed.)
 
 ## System overview
 
@@ -18,19 +18,13 @@ serves both a website and an Android app.
                     │  NestJS REST API  │
                     │  /api/v1/...      │
                     │  JWT auth + RBAC  │
-                    └───▲──────────▲────┘
-                        │          │
-              HTTPS/JSON│          │HTTPS/JSON
-                        │          │
-              ┌─────────┴──┐   ┌───┴──────────┐
-              │   web/      │   │   mobile/     │
-              │  Next.js    │   │  Flutter      │
-              │  website    │   │  Android app  │
-              └─────────────┘   └───────────────┘
+                    └────────▲─────────┘
+                             │ HTTPS/JSON
+                    ┌────────┴─────────┐
+                    │   web/            │
+                    │  Next.js website  │
+                    └──────────────────┘
 ```
-
-Both the website and the Android app are plain REST clients of the same backend — there is no
-web-specific or mobile-specific API. Anything added to the API is immediately usable by both.
 
 ## Why this stack
 
@@ -41,9 +35,6 @@ web-specific or mobile-specific API. Anything added to the API is immediately us
 - **Web — Next.js (App Router, TypeScript, Tailwind).** Server-capable React for a website with public
   pages (landing, job listings) alongside authenticated dashboards, and shared TypeScript types with a
   TypeScript backend.
-- **Mobile — Flutter.** A single Dart codebase targeting Android now, with the option to add iOS later
-  from the same source. `provider` handles app-wide auth state; a small hand-rolled `ApiClient` talks to
-  the same REST API as the website.
 - **Local infra — Docker Compose.** Postgres and Redis run in containers so the local setup matches what
   production will look like. Redis is provisioned for future use (rate limiting, job queues, caching) but
   nothing depends on it yet.
@@ -62,12 +53,12 @@ new trades can be added by an admin later without a schema change. Categories ar
 | `worker_profiles`    | A worker's trade, skills, rate, availability, rating — 1:1 with a user   |
 | `client_profiles`    | A hirer's name/company, type (individual/company) — 1:1 with a user     |
 | `jobs`               | A posting from a client: category, location, rate, schedule, status     |
-| `job_applications`   | A worker's application to a job: proposed rate, message, status          |
-| `reviews`            | Post-job rating between the two parties                                  |
+| `job_applications`   | Historical only: candidates' applications from when they could browse jobs |
+| `reviews`            | Historical only: post-job ratings from the retired reviews feature        |
 
-`jobs.status` moves `open → assigned → in_progress → completed` (or `cancelled`); accepting an
-application automatically flips the job to `assigned`. `job_applications.status` moves
-`pending → accepted/rejected` or `withdrawn` by the worker.
+A job is a client's **requirement**, seen only by that client and by admins; candidates no longer browse
+or apply to jobs, and there is no reviews API. `jobs.status` moves `open → assigned → in_progress →
+completed` (or `cancelled`). The two historical tables are kept so old rows stay intact.
 
 ## Authentication — two account types, one login
 
@@ -84,7 +75,7 @@ There is a single `users` table with a `role` column, not two parallel auth syst
 
 Every protected route is guarded by `JwtAuthGuard` (validates the token) and, where the action is
 role-specific, `RolesGuard` + `@Roles('worker' | 'client' | 'admin')` (e.g. only a `client` can `POST
-/v1/jobs`; only a `worker` can apply to one). This was verified directly: a worker token gets `403` on
+/v1/jobs` or read one). This was verified directly: a worker token gets `403` on
 `POST /v1/jobs`, and an unauthenticated request gets `401` on `GET /v1/workers/me`.
 
 ## API surface (v1)
@@ -107,20 +98,10 @@ PUT    /v1/workers/me                           [worker]
 GET    /v1/clients/me                           [client]
 PUT    /v1/clients/me                           [client]
 
-POST   /v1/jobs                                 [client] create a posting
-GET    /v1/jobs                                 browse open jobs (public)
+POST   /v1/jobs                                 [client] post a requirement
 GET    /v1/jobs/mine                            [client] own postings
-GET    /v1/jobs/:id                              public job detail
+GET    /v1/jobs/:id                              [client, owner only]
 PATCH  /v1/jobs/:id/status                       [client, owner only]
-
-POST   /v1/jobs/:jobId/applications              [worker] apply to a job
-GET    /v1/jobs/:jobId/applications              [client, owner only] view applicants
-GET    /v1/applications/mine                     [worker] own applications
-PATCH  /v1/applications/:id                       [client, owner only] accept/reject
-PATCH  /v1/applications/:id/withdraw              [worker, owner only]
-
-POST   /v1/jobs/:jobId/reviews                    [auth] rate the other party
-GET    /v1/reviews?userId=...                     public reviews for a user
 
 POST   /v1/auth/change-password                   [auth] ends other sessions
 PUT    /v1/workers/me/resume                      [worker] multipart `resume`
@@ -152,9 +133,7 @@ DriverLink/
 │   │   ├── categories/      labour taxonomy
 │   │   ├── workers/         worker profile CRUD + search
 │   │   ├── clients/         client profile CRUD
-│   │   ├── jobs/             job postings
-│   │   ├── applications/     worker ↔ job applications
-│   │   ├── reviews/          post-job ratings
+│   │   ├── jobs/             client job requirements
 │   │   ├── database/         Drizzle schema + connection
 │   │   └── common/           JWT/roles guards, decorators
 │   ├── drizzle/              generated SQL migrations
@@ -164,12 +143,6 @@ DriverLink/
 │   ├── app/                  routes: /, /login, /register/*, /worker/*, /client/*
 │   ├── components/           NavBar, RequireRole guard
 │   └── lib/                  API client, auth context, shared types
-├── mobile/             Flutter Android app
-│   └── lib/
-│       ├── screens/          role-select, login, register, worker/*, client/*
-│       ├── state/            AuthState (ChangeNotifier, persisted via shared_preferences)
-│       ├── services/         ApiClient
-│       └── models/           DTOs mirroring the backend schema
 ├── docker-compose.yml  Postgres + Redis (+ optional containerized backend)
 └── _archive_legacy/    the previous Laravel/trucking-domain prototype (kept, not deleted)
 ```
@@ -197,34 +170,15 @@ cd ../web
 npm install
 npm run dev                # http://localhost:3000 by default; use -p to change port
                             # reads NEXT_PUBLIC_API_URL from .env.local
-
-# 4. Android app
-cd ../mobile
-flutter pub get
-flutter run --no-enable-impeller   # see note below on why this flag is needed for `flutter run`
-# on a physical device on the same network:
-flutter run --no-enable-impeller --dart-define=API_BASE_URL=http://<your-lan-ip>:3000/api
 ```
 
 Postgres is published on host port **5433** (not 5432) because this machine already had a native
 PostgreSQL service bound to 5432; `backend/.env` and `docker-compose.yml` are already wired for 5433.
 
-**`--no-enable-impeller` is required for `flutter run` (debug) on this emulator image.** Its Impeller/
-OpenGLES renderer fails to composite overlay routes — dropdown menus, date/time pickers, modal bottom
-sheets — silently: they don't appear on screen and don't register taps, while every other widget renders
-and responds normally. Everything else (network calls, forms, navigation) works fine even with Impeller
-on, which is what makes this easy to misdiagnose as a backend/connectivity problem instead. Switching to
-the Skia renderer (`--no-enable-impeller`) fixes it. This flag only affects debug `flutter run` sessions —
-`android/app/src/main/AndroidManifest.xml` already sets the equivalent
-`io.flutter.embedding.android.EnableImpeller = false` for release/profile builds
-(`flutter build apk`/`appbundle`), since debug and release read that setting through different paths.
-Re-test without the flag if a future Flutter or emulator image update might have fixed the underlying
-Impeller bug — it's a real upstream issue, not something specific to this app's code.
-
 ## Sessions and revocation
 
-Access tokens last ~15 minutes; refresh tokens last 7 days. Both clients transparently
-refresh-and-retry on a 401 (`web/lib/api.ts`, `mobile/lib/services/api_client.dart`), collapsing
+Access tokens last ~15 minutes; refresh tokens last 7 days. The website transparently
+refresh-and-retries on a 401 (`web/lib/api.ts`), collapsing
 concurrent refreshes onto one request so a screen firing several calls at once doesn't trip the auth
 rate limit.
 
@@ -243,33 +197,22 @@ Each refresh token carries a `jti`. Without it, two tokens minted for the same u
 second are byte-identical — JWT `iat` only has one-second resolution — and collide on the stored hash.
 Logging in immediately after registering hits exactly that case.
 
-Cleartext HTTP is enabled only in the **debug and profile** manifests
-(`mobile/android/app/src/{debug,profile}/AndroidManifest.xml`) so the emulator can reach
-`http://10.0.2.2:3000`. The main manifest deliberately omits it, so release builds refuse non-HTTPS
-traffic by default — verified by inspecting the merged manifest of both build types.
-
 ## Testing
 
 ```bash
-cd backend && npm run test:api        # 84 checks against a running server
-cd backend && ADMIN_PHONE=… ADMIN_PASSWORD=… npm run test:admin   # 211 checks: registration
-                                      # limits, resume handling, privacy, admin API
-cd mobile  && flutter test            # widget tests
-cd mobile  && flutter analyze         # static analysis
+cd backend && npm run test:api        # end-to-end checks against a running server
+cd backend && ADMIN_PHONE=… ADMIN_PASSWORD=… npm run test:admin   # registration limits,
+                                      # resume handling, privacy, admin API
 cd web     && npm run build           # type-checks as part of the build
 cd web     && npm run check:contrast  # WCAG AA gate on the design tokens
 ```
 
 `backend/test/api-e2e.mjs` is the main safety net. It drives a **running** server over HTTP rather than
 mocking, so it covers the wiring (guards, pipes, throttler, DB) that unit tests would stub out. It walks
-registration → login → job → application → accept → complete → review, then checks the areas that have
-actually broken before:
+registration → login → a client's job requirement (and asserts job browsing, applying and reviews are
+gone), then checks the areas that have actually broken before:
 
-- **Worker aggregates.** `worker_profiles.rating` / `completed_jobs` are denormalised columns that both
-  UIs display. Nothing wrote to them originally, so they showed `0.00 · 0 jobs` forever. The suite asserts
-  a review updates the average, that a second review *averages* rather than overwrites, and that
-  re-sending `completed` doesn't double-count.
-- **Token refresh.** Access tokens last ~15 minutes and both clients refresh-and-retry on a 401. If this
+- **Token refresh.** Access tokens last ~15 minutes and the website refresh-and-retries on a 401. If this
   regresses, every logged-in user is locked out a quarter-hour after signing in — with no visible cause.
 - **Malformed path params.** A non-UUID id used to reach the driver and surface as a 500; these must be
   400s.
@@ -286,10 +229,9 @@ library), which is a larger change than it's worth right now. They are known, no
 let genuinely new lint errors hide behind that count.
 
 `web/scripts/check-contrast.mjs` guards the palette. The accent and teal were darkened specifically so
-white button text clears 4.5:1 — they previously sat at 3.7 and 4.2, meaning every primary button on both
-surfaces failed AA. The script hard-codes the token values, so **it must be updated alongside
-`web/app/globals.css` and `mobile/lib/theme.dart`**; those two files are the palette's only definitions
-and nothing else keeps them in sync.
+white button text clears 4.5:1. The palette now comes from the brand kit (`web/app/brand.css`), and the
+script hard-codes the token values, so **it must be updated alongside `web/app/brand.css`**; nothing else
+keeps them in sync.
 
 ## What's deliberately out of scope for v1
 
@@ -297,12 +239,8 @@ These are natural next additions, not oversights:
 
 - **Payments / escrow** — no wallet debit/credit logic yet, though `client_profiles.walletBalance` exists
   as a placeholder in the original schema exploration.
-- **Push notifications** — job/application status changes aren't pushed to the app yet.
 - **Category management UI** — the admin panel (`/admin`) covers candidates, clients, placements and
   admins, but the list of positions is still edited in `backend/src/database/categories.seed.ts`.
-- **HTTPS** — the backend is still served over plain HTTP locally. Cleartext is no longer enabled in the
-  app's release builds (see "Sessions and revocation"), so the API must be behind TLS before a release
-  build can talk to it at all.
 
 ## Rate limiting
 
@@ -339,10 +277,8 @@ The local setup mirrors the intended production shape closely on purpose:
 
 1. Push `backend/` to a container registry, deploy behind HTTPS (e.g. a managed Postgres + a container
    host). `backend/Dockerfile` already builds a runnable image.
-2. Point `web/.env.local`'s `NEXT_PUBLIC_API_URL` and `mobile`'s `--dart-define=API_BASE_URL` at the
-   deployed API URL instead of localhost.
-3. Deploy `web/` (e.g. to any Node hosting) and build a signed Android release
-   (`flutter build appbundle`) once the backend is reachable over the public internet.
+2. Point `web/.env.local`'s `NEXT_PUBLIC_API_URL` at the deployed API URL instead of localhost.
+3. Deploy `web/` (e.g. to any Node hosting).
 
 No architectural changes are needed to move from "local Docker Compose" to "cloud" — only environment
 configuration.

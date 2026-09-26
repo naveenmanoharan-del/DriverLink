@@ -14,7 +14,6 @@ import {
   workerProfiles,
 } from '../database/schema';
 import { CreateJobDto } from './dto/create-job.dto';
-import { SearchJobsDto } from './dto/search-jobs.dto';
 import { UpdateJobStatusDto } from './dto/update-job-status.dto';
 
 @Injectable()
@@ -51,33 +50,6 @@ export class JobsService {
     return job;
   }
 
-  async search(query: SearchJobsDto) {
-    const conditions = [];
-    if (query.categoryId)
-      conditions.push(eq(jobs.categoryId, query.categoryId));
-    if (query.status)
-      conditions.push(
-        eq(
-          jobs.status,
-          query.status as (typeof jobs.status.enumValues)[number],
-        ),
-      );
-    else conditions.push(eq(jobs.status, 'open'));
-
-    const page = query.page ?? 1;
-    const pageSize = query.pageSize ?? 25;
-
-    const results = await this.db
-      .select()
-      .from(jobs)
-      .where(and(...conditions))
-      .orderBy(desc(jobs.createdAt))
-      .limit(pageSize)
-      .offset((page - 1) * pageSize);
-
-    return { data: results, page, pageSize };
-  }
-
   async findMine(userId: string) {
     const clientId = await this.clientIdForUser(userId);
     return this.db
@@ -90,6 +62,15 @@ export class JobsService {
   async findOne(id: string) {
     const job = await this.db.query.jobs.findFirst({ where: eq(jobs.id, id) });
     if (!job) throw new NotFoundException('Job not found');
+    return job;
+  }
+
+  /** A client's own job. Jobs are requirements sent to the admin, not public listings. */
+  async findOwn(userId: string, id: string) {
+    const job = await this.findOne(id);
+    const clientId = await this.clientIdForUser(userId);
+    if (job.clientId !== clientId)
+      throw new ForbiddenException('You do not own this job');
     return job;
   }
 

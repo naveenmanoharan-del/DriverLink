@@ -107,16 +107,6 @@ export interface Job {
   createdAt: string;
 }
 
-export interface JobApplication {
-  id: string;
-  jobId: string;
-  workerId: string;
-  proposedRate: string;
-  message: string | null;
-  status: ApplicationStatus;
-  createdAt: string;
-}
-
 export interface ResumeMeta {
   fileName: string;
   mimeType: string;

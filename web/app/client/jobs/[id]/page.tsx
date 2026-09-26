@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { RequireRole } from '@/components/require-role';
 import { useAuth } from '@/lib/auth-context';
 import { apiFetch } from '@/lib/api';
-import type { Job, JobApplication } from '@/lib/types';
-import { Button, Card, Eyebrow, StatusPill } from '@/components/ui';
+import type { Job } from '@/lib/types';
+import { Eyebrow, StatusPill } from '@/components/ui';
 
 export default function JobDetailPage() {
   return (
@@ -20,45 +20,19 @@ function JobDetail() {
   const { id } = useParams<{ id: string }>();
   const { session } = useAuth();
   const [job, setJob] = useState<Job | null>(null);
-  const [applications, setApplications] = useState<JobApplication[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [actionError, setActionError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    if (!session) return;
-    setLoading(true);
-    try {
-      const [jobResult, applicationsResult] = await Promise.all([
-        apiFetch<Job>(`/v1/jobs/${id}`),
-        apiFetch<JobApplication[]>(`/v1/jobs/${id}/applications`, { token: session.accessToken }),
-      ]);
-      setJob(jobResult);
-      setApplications(applicationsResult);
-    } finally {
-      setLoading(false);
-    }
-  }, [id, session]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    load();
-  }, [load]);
-
-  async function decide(applicationId: string, status: 'accepted' | 'rejected') {
     if (!session) return;
-    setActionError(null);
-    try {
-      await apiFetch(`/v1/applications/${applicationId}`, {
-        method: 'PATCH',
-        token: session.accessToken,
-        body: { status },
-      });
-      load();
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Failed to update application');
-    }
-  }
+    apiFetch<Job>(`/v1/jobs/${id}`, { token: session.accessToken })
+      .then(setJob)
+      .catch((err) => setError(err instanceof Error ? err.message : 'Could not load this requirement'));
+  }, [id, session]);
 
-  if (loading || !job) {
+  if (error) {
+    return <div className="mx-auto max-w-3xl px-4 py-10 text-sm text-warn">{error}</div>;
+  }
+  if (!job) {
     return <div className="mx-auto max-w-3xl px-4 py-10 text-sm text-body">Loading…</div>;
   }
 
@@ -73,41 +47,11 @@ function JobDetail() {
         </p>
         <StatusPill status={job.status} />
       </div>
-
-      <h2 className="mt-10 text-xl font-bold tracking-tight text-ink">Applicants</h2>
-      {actionError && <p className="mt-2 text-sm text-warn">{actionError}</p>}
-
-      {applications.length === 0 ? (
-        <p className="mt-3 text-sm text-body">No applications yet.</p>
-      ) : (
-        <ul className="mt-3 space-y-3">
-          {applications.map((app) => (
-            <li key={app.id}>
-              <Card className="p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm text-ink">
-                      Proposed rate: <span className="font-semibold">{app.proposedRate}</span>
-                    </p>
-                    {app.message && <p className="mt-1 text-sm italic text-ink/70">&ldquo;{app.message}&rdquo;</p>}
-                    <div className="mt-1.5">
-                      <StatusPill status={app.status} />
-                    </div>
-                  </div>
-                  {app.status === 'pending' && (
-                    <div className="flex shrink-0 gap-2">
-                      <Button onClick={() => decide(app.id, 'accepted')}>Accept</Button>
-                      <Button variant="secondary" onClick={() => decide(app.id, 'rejected')}>
-                        Reject
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      )}
+      <p className="mt-2 text-sm text-body">
+        {job.workersRequired} position{job.workersRequired === 1 ? '' : 's'} · starts{' '}
+        {new Date(job.startsAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+      </p>
+      {job.description && <p className="mt-6 whitespace-pre-line text-[15px] leading-relaxed text-ink">{job.description}</p>}
     </div>
   );
 }

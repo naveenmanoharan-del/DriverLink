@@ -6,12 +6,10 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
-import { SearchJobsDto } from './dto/search-jobs.dto';
 import { UpdateJobStatusDto } from './dto/update-job-status.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -30,11 +28,6 @@ export class JobsController {
     return this.jobs.create(user.userId, dto);
   }
 
-  @Get()
-  search(@Query() query: SearchJobsDto) {
-    return this.jobs.search(query);
-  }
-
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('client')
   @Get('mine')
@@ -42,9 +35,16 @@ export class JobsController {
     return this.jobs.findMine(user.userId);
   }
 
+  // Candidates no longer browse or apply to jobs: a job is a client's requirement,
+  // visible only to the client who posted it (and to admins via /v1/admin).
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('client')
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.jobs.findOne(id);
+  findOne(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.jobs.findOwn(user.userId, id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

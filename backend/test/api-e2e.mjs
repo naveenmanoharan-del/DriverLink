@@ -2,9 +2,8 @@
  * End-to-end API test suite.
  *
  * Exercises every controller route against a *running* server: registration and
- * login, role guards, the full job -> application -> review lifecycle, the
- * denormalised worker aggregates, token refresh, input validation and rate
- * limiting.
+ * login, role guards, client job requirements (and that job browsing, applying
+ * and reviews are gone), token refresh, input validation and rate limiting.
  *
  * Usage:
  *   npm run test:api                       # against http://localhost:3000/api
@@ -219,49 +218,28 @@ async function run() {
   check('GET /v1/jobs/mine 200', mine.status === 200, `got ${mine.status}`);
   check('own job appears in /mine', (mine.data || []).some((j) => j.id === state.jobId));
 
-  const openJobs = await api('/v1/jobs', { token: state.workerToken });
-  check('GET /v1/jobs (worker browse) 200', openJobs.status === 200, `got ${openJobs.status}`);
-  check('GET /v1/jobs is paginated {data,page,pageSize}', Array.isArray(openJobs.data?.data) && openJobs.data?.page != null, JSON.stringify(openJobs.data).slice(0, 120));
-  check('new job visible to worker', (openJobs.data?.data || []).some((j) => j.id === state.jobId));
-
-  const jobDetail = await api(`/v1/jobs/${state.jobId}`, { token: state.workerToken });
-  check('GET /v1/jobs/:id 200', jobDetail.status === 200, `got ${jobDetail.status}`);
+  // Candidates no longer browse or apply: a job is a requirement only its client sees.
+  const jobDetail = await api(`/v1/jobs/${state.jobId}`, { token: state.clientToken });
+  check('client GET own /v1/jobs/:id 200', jobDetail.status === 200, `got ${jobDetail.status}`);
   check('job detail title matches', jobDetail.data?.title === 'E2E Test Job', `got ${jobDetail.data?.title}`);
 
-  section('Applications');
-  const applyRes = await api(`/v1/jobs/${state.jobId}/applications`, {
+  section('Job browsing and applying are gone');
+  const browse = await api('/v1/jobs', { token: state.workerToken });
+  check('GET /v1/jobs (browse) no longer exists (404)', browse.status === 404, `got ${browse.status}`);
+  const workerSeesJob = await api(`/v1/jobs/${state.jobId}`, { token: state.workerToken });
+  check('worker cannot GET /v1/jobs/:id (403)', workerSeesJob.status === 403, `got ${workerSeesJob.status}`);
+  const anonSeesJob = await api(`/v1/jobs/${state.jobId}`);
+  check('anonymous GET /v1/jobs/:id rejected (401)', anonSeesJob.status === 401, `got ${anonSeesJob.status}`);
+  const apply = await api(`/v1/jobs/${state.jobId}/applications`, {
     method: 'POST',
     token: state.workerToken,
-    body: { proposedRate: '1100', message: 'Available and verified.' },
+    body: { proposedRate: '1100' },
   });
-  check('POST application 201', applyRes.status === 201, `got ${applyRes.status} ${JSON.stringify(applyRes.data)}`);
-  state.appId = applyRes.data?.id;
-  check('application starts pending', applyRes.data?.status === 'pending', `got ${applyRes.data?.status}`);
-
-  const dupeApply = await api(`/v1/jobs/${state.jobId}/applications`, {
-    method: 'POST',
-    token: state.workerToken,
-    body: { proposedRate: '1000' },
-  });
-  check('duplicate application rejected', dupeApply.status >= 400, `got ${dupeApply.status}`);
-
+  check('applying no longer exists (404)', apply.status === 404, `got ${apply.status}`);
   const myApps = await api('/v1/applications/mine', { token: state.workerToken });
-  check('GET /v1/applications/mine 200', myApps.status === 200, `got ${myApps.status}`);
-  check('own application listed', (myApps.data || []).some((a) => a.id === state.appId));
-
-  const jobApps = await api(`/v1/jobs/${state.jobId}/applications`, { token: state.clientToken });
-  check('client sees applications on job', jobApps.status === 200 && (jobApps.data || []).some((a) => a.id === state.appId), `got ${jobApps.status}`);
-
-  const accept = await api(`/v1/applications/${state.appId}`, {
-    method: 'PATCH',
-    token: state.clientToken,
-    body: { status: 'accepted' },
-  });
-  check('PATCH application → accepted 200', accept.status === 200, `got ${accept.status} ${JSON.stringify(accept.data)}`);
-
-  const myApps2 = await api('/v1/applications/mine', { token: state.workerToken });
-  const acceptedApp = (myApps2.data || []).find((a) => a.id === state.appId);
-  check('worker sees accepted status', acceptedApp?.status === 'accepted', `got ${acceptedApp?.status}`);
+  check('GET /v1/applications/mine no longer exists (404)', myApps.status === 404, `got ${myApps.status}`);
+  const reviews = await api(`/v1/reviews?userId=${state.workerId}`, { token: state.clientToken });
+  check('reviews API no longer exists (404)', reviews.status === 404, `got ${reviews.status}`);
 
   section('Job status transitions');
   for (const s of ['in_progress', 'completed']) {
@@ -271,81 +249,9 @@ async function run() {
   const finalJob = await api(`/v1/jobs/${state.jobId}`, { token: state.clientToken });
   check('job is completed', finalJob.data?.status === 'completed', `got ${finalJob.data?.status}`);
 
-  section('Reviews');
-  const review = await api(`/v1/jobs/${state.jobId}/reviews`, {
-    method: 'POST',
-    token: state.clientToken,
-    body: { toUserId: state.workerId, rating: 5, comment: 'Excellent work, punctual and verified.' },
-  });
-  check('POST review 201', review.status === 201, `got ${review.status} ${JSON.stringify(review.data)}`);
-
-  const reviews = await api(`/v1/reviews?userId=${state.workerId}`, { token: state.clientToken });
-  check('GET /v1/reviews 200', reviews.status === 200, `got ${reviews.status}`);
-  check('review listed for worker', Array.isArray(reviews.data) && reviews.data.length > 0, `got ${JSON.stringify(reviews.data)}`);
-
-  const wAfter = await api('/v1/workers/me', { token: state.workerToken });
-  check('worker rating updated after review', Number(wAfter.data?.rating) === 5, `rating=${wAfter.data?.rating}`);
-  check('worker completedJobs incremented', Number(wAfter.data?.completedJobs) === 1, `completedJobs=${wAfter.data?.completedJobs}`);
-
-  // A second review should average, not overwrite.
-  const review2 = await api(`/v1/jobs/${state.jobId}/reviews`, {
-    method: 'POST',
-    token: state.clientToken,
-    body: { toUserId: state.workerId, rating: 3, comment: 'Second review.' },
-  });
-  check('second review accepted', review2.status === 201, `got ${review2.status}`);
-  const wAvg = await api('/v1/workers/me', { token: state.workerToken });
-  check('rating averages across reviews (5,3 → 4)', Number(wAvg.data?.rating) === 4, `rating=${wAvg.data?.rating}`);
-
-  // Both dashboards render the profile embedded in /v1/auth/me rather than
-  // calling /v1/workers/me, and they cache it. If this payload doesn't carry
-  // the fresh aggregate, the UI shows a stale rating no matter how many jobs
-  // the worker finishes.
-  const meAfter = await api('/v1/auth/me', { token: state.workerToken });
-  check(
-    '/v1/auth/me profile carries the updated rating',
-    Number(meAfter.data?.profile?.rating) === 4,
-    `rating=${meAfter.data?.profile?.rating}`,
-  );
-  check(
-    '/v1/auth/me profile carries completedJobs',
-    Number(meAfter.data?.profile?.completedJobs) === 1,
-    `completedJobs=${meAfter.data?.profile?.completedJobs}`,
-  );
-
-  // Re-sending completed must not double-count.
-  await api(`/v1/jobs/${state.jobId}/status`, { method: 'PATCH', token: state.clientToken, body: { status: 'completed' } });
-  const wIdem = await api('/v1/workers/me', { token: state.workerToken });
-  check('re-completing job does not double-count', Number(wIdem.data?.completedJobs) === 1, `completedJobs=${wIdem.data?.completedJobs}`);
-
-  section('Withdraw flow (second job)');
-  const job2 = await api('/v1/jobs', {
-    method: 'POST',
-    token: state.clientToken,
-    body: { categoryId: state.categoryId2, title: 'E2E Withdraw Job', location: 'Chennai', workersRequired: 1, offeredRate: '600', rateUnit: 'day', startsAt },
-  });
-  check('second job created', job2.status === 201, `got ${job2.status}`);
-  const app2 = await api(`/v1/jobs/${job2.data?.id}/applications`, {
-    method: 'POST',
-    token: state.workerToken,
-    body: { proposedRate: '650' },
-  });
-  check('applied to second job', app2.status === 201, `got ${app2.status}`);
-  const withdraw = await api(`/v1/applications/${app2.data?.id}/withdraw`, { method: 'PATCH', token: state.workerToken });
-  check('PATCH withdraw 200', withdraw.status === 200, `got ${withdraw.status} ${JSON.stringify(withdraw.data)}`);
-  const myApps3 = await api('/v1/applications/mine', { token: state.workerToken });
-  const wd = (myApps3.data || []).find((a) => a.id === app2.data?.id);
-  check('application shows withdrawn', wd?.status === 'withdrawn', `got ${wd?.status}`);
-
   section('Validation');
   const badJob = await api('/v1/jobs', { method: 'POST', token: state.clientToken, body: { title: '' } });
   check('invalid job payload rejected 400', badJob.status === 400, `got ${badJob.status}`);
-  const badRating = await api(`/v1/jobs/${state.jobId}/reviews`, {
-    method: 'POST',
-    token: state.clientToken,
-    body: { toUserId: state.workerId, rating: 99 },
-  });
-  check('out-of-range rating rejected', badRating.status >= 400, `got ${badRating.status}`);
 
   section('Token refresh');
   // Both clients depend on this: the access token is short-lived, and a 401
@@ -401,8 +307,6 @@ async function run() {
   const badIdCases = [
     ['GET /v1/jobs/:id', await api('/v1/jobs/not-a-uuid', { token: state.clientToken })],
     ['GET /v1/workers/:id', await api('/v1/workers/not-a-uuid', { token: state.clientToken })],
-    ['PATCH /v1/applications/:id', await api('/v1/applications/undefined', { method: 'PATCH', token: state.clientToken, body: { status: 'accepted' } })],
-    ['GET /v1/jobs/:jobId/applications', await api('/v1/jobs/abc/applications', { token: state.clientToken })],
   ];
   for (const [label, res] of badIdCases) {
     check(`${label} with bad uuid → 400 (not 500)`, res.status === 400, `got ${res.status}`);

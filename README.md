@@ -1,7 +1,7 @@
 # Yukti Solutions
 
-A manpower supply platform: a website and an Android app, sharing one backend, connecting **clients**
-(who need workers) with **workers** across physical labour, drivers, artisans, and office staff.
+A staffing platform for the construction industry: a website backed by one REST API. Candidates
+register with their CV; clients post their requirements; the team works both from the admin panel.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full system design, data model, API contract, and
 local setup instructions.
@@ -9,7 +9,6 @@ local setup instructions.
 ```
 backend/   NestJS + Drizzle + PostgreSQL — the shared REST API
 web/       Next.js website
-mobile/    Flutter Android app
 ```
 
 `_archive_legacy/` holds two earlier, unrelated prototypes this workspace previously contained (not

@@ -13,8 +13,6 @@ import { CategoriesModule } from './categories/categories.module';
 import { WorkersModule } from './workers/workers.module';
 import { ClientsModule } from './clients/clients.module';
 import { JobsModule } from './jobs/jobs.module';
-import { ApplicationsModule } from './applications/applications.module';
-import { ReviewsModule } from './reviews/reviews.module';
 import { MailModule } from './mail/mail.module';
 import { ResumesModule } from './resumes/resumes.module';
 import { AdminModule } from './admin/admin.module';
@@ -44,8 +42,6 @@ import { AppService } from './app.service';
     WorkersModule,
     ClientsModule,
     JobsModule,
-    ApplicationsModule,
-    ReviewsModule,
     AdminModule,
   ],
   controllers: [AppController],

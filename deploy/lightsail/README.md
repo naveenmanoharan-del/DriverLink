@@ -153,8 +153,6 @@ automatic renewal.
 
 ## 9. After the cut-over
 
-- **Android app:** rebuild against the new API:
-  `flutter build apk --release --dart-define=API_BASE_URL=https://yuktisolutions.co.in/api`
 - **Render:** once the new site has run cleanly for a few days, delete both
   Render services and `.github/workflows/keep-warm.yml`. Nothing sleeps any
   more, so the pings aren't needed.

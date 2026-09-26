@@ -1,7 +1,7 @@
 {
   "name": "manpower-backend",
   "version": "0.1.0",
-  "description": "Manpower supply platform API - shared backend for web and Android app",
+  "description": "Yukti Solutions staffing platform API - backend for the website",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

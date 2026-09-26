@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { RequireRole } from '@/components/require-role';
 import { useAuth } from '@/lib/auth-context';
 import { apiFetch, apiUrl } from '@/lib/api';
@@ -66,14 +65,6 @@ function WorkerDashboard() {
 
       {session && <ResumeCard token={session.accessToken} />}
 
-      <div className="mt-6 flex flex-wrap gap-4">
-        <Link href="/worker/jobs">
-          <Button>Browse open positions</Button>
-        </Link>
-        <Link href="/worker/applications">
-          <Button variant="secondary">My applications</Button>
-        </Link>
-      </div>
     </div>
   );
 }

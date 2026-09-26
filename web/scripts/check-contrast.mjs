@@ -6,9 +6,7 @@
  * Run with `npm run check:contrast`. Exits non-zero on any failure.
  *
  * These values are duplicated from the brand kit and must be kept in step with
- * it — there is no shared source of truth across the web and Flutter apps:
- *   - web/app/brand.css         (--ys-* tokens, mapped in globals.css @theme)
- *   - mobile/lib/theme.dart     (AppColors, still on the old palette)
+ * web/app/brand.css (the --ys-* tokens, mapped in globals.css @theme).
  *
  * Amber is deliberately absent as a text colour on white (2.2:1): it is only
  * used for decorative marks there, and as text or focus rings on navy.
