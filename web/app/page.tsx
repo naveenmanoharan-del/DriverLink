@@ -18,12 +18,9 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/25 to-ink/10" />
         <div className="absolute inset-x-0 bottom-0 px-4 pb-14">
           <div className="mx-auto max-w-5xl">
-            {/* Staggered entrance: label, headline, body, then the actions. */}
-            <p className="animate-fade-up text-sm text-white" style={{ '--delay': '120ms' } as React.CSSProperties}>
-              Railway &amp; highway consultancy staffing
-            </p>
+            {/* Staggered entrance: headline, body, then the actions. */}
             <h1
-              className="mt-3 max-w-2xl animate-fade-up text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl"
+              className="max-w-2xl animate-fade-up text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl"
               style={{ '--delay': '220ms' } as React.CSSProperties}
             >
               The right key personnel for every bid.
