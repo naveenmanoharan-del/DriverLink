@@ -53,7 +53,7 @@ export default function RegisterClientPage() {
     <div className="mx-auto max-w-md px-4 py-12">
       <Eyebrow>Join the register</Eyebrow>
       <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">Register as a client</h1>
-      <p className="mt-1 text-sm text-body">Source key personnel and office staff for railway and highway contracts.</p>
+      <p className="mt-1 text-sm text-body">Source key personnel, engineers and office staff for construction and infrastructure projects.</p>
 
       <Card className="mt-6 p-6">
         <form onSubmit={handleSubmit} className="space-y-5">

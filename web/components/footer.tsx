@@ -1,5 +1,5 @@
 const FOR_CLIENTS = ['Post a requirement', 'Key personnel for bids', 'Site office staffing'];
-const FOR_WORKERS = ['Submit your CV', 'Retired railway officers', 'Railway & highway roles'];
+const FOR_WORKERS = ['Submit your CV', 'Retired government officers', 'Construction & infrastructure roles'];
 
 function HighlightText({ children }: { children: string }) {
   return (
@@ -26,7 +26,7 @@ export function Footer() {
               </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/70">
-              Key personnel, engineers and office staff for railway and highway consultancy contracts.
+              Key personnel, engineers and office staff for construction and infrastructure projects.
             </p>
           </div>
 
@@ -55,7 +55,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col gap-2 border-t border-white/15 pt-6 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} Yukti Solutions. All rights reserved.</p>
-          <p>GC · PMC · PGMS · PSSA · AE / IE</p>
+          <p>Infrastructure · Buildings · Industrial · Water · Power</p>
         </div>
       </div>
     </footer>

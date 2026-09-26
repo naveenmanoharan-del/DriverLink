@@ -5,9 +5,9 @@ import * as schema from './schema';
 type Group = (typeof schema.categoryGroup.enumValues)[number];
 
 /**
- * The roles the platform recruits for: personnel that consultancy firms name in
- * bids for railway and highway contracts (GC, PMC, PGMS, PSSA, Authority /
- * Independent Engineer), from key experts down to site-office support staff.
+ * The roles the platform recruits for across the construction industry: the
+ * personnel contractors, consultants and developers name in bids and staff
+ * their projects with, from key experts down to site-office support staff.
  *
  * This list is the whole active taxonomy. Anything in the database that is not
  * listed here is deactivated on the next seed — hidden from the forms, but kept
@@ -21,7 +21,12 @@ export const CATEGORY_SEED: {
   {
     name: 'Team Leader / Project Director',
     group: 'key_personnel',
-    description: 'Leads the consultancy team on a GC / PMC / AE contract',
+    description: 'Leads the team on a consultancy, EPC or construction contract',
+  },
+  {
+    name: 'Project Manager / Construction Manager',
+    group: 'key_personnel',
+    description: 'Runs construction projects for contractors, developers and EPC firms',
   },
   {
     name: 'Resident Engineer / Deputy Team Leader',
@@ -31,7 +36,7 @@ export const CATEGORY_SEED: {
   {
     name: 'Bridge / Structural Expert',
     group: 'key_personnel',
-    description: 'Major and minor bridges, ROBs/RUBs, viaducts, structures',
+    description: 'Buildings, bridges, viaducts, industrial and other structures',
   },
   {
     name: 'Track / P-Way Expert',
@@ -57,6 +62,11 @@ export const CATEGORY_SEED: {
     name: 'OHE / Traction Electrical Expert',
     group: 'key_personnel',
     description: 'Railway electrification, OHE, traction substations',
+  },
+  {
+    name: 'MEP / Building Services Expert',
+    group: 'key_personnel',
+    description: 'HVAC, plumbing, fire-fighting and electrical services',
   },
   {
     name: 'Contract & Procurement Specialist',
@@ -93,6 +103,21 @@ export const CATEGORY_SEED: {
     name: 'Site Engineer (Civil)',
     group: 'technical_staff',
     description: 'Day-to-day supervision of civil works',
+  },
+  {
+    name: 'Site Supervisor / Foreman',
+    group: 'technical_staff',
+    description: 'Supervises workmen and daily progress on site',
+  },
+  {
+    name: 'MEP Engineer',
+    group: 'technical_staff',
+    description: 'Mechanical, electrical and plumbing works supervision',
+  },
+  {
+    name: 'Safety Officer',
+    group: 'technical_staff',
+    description: 'Site safety inspections, permits and toolbox talks',
   },
   {
     name: 'Section Engineer / Inspector (Works, P-Way, Bridges)',
@@ -139,6 +164,11 @@ export const CATEGORY_SEED: {
     name: 'Document Controller',
     group: 'support_staff',
     description: 'Correspondence, drawings and document registers',
+  },
+  {
+    name: 'Store Keeper',
+    group: 'support_staff',
+    description: 'Site stores, material receipts and inventory',
   },
   {
     name: 'HR & Admin Executive',

@@ -2,7 +2,16 @@ export type Role = 'worker' | 'client' | 'admin';
 export type CategoryGroup = 'key_personnel' | 'technical_staff' | 'support_staff';
 export type RateUnit = 'hour' | 'day' | 'job' | 'month';
 export type Background = 'retired_railway' | 'retired_govt' | 'private_sector';
-export type Sector = 'railways' | 'highways';
+export type Sector =
+  | 'railways'
+  | 'metro'
+  | 'highways'
+  | 'buildings'
+  | 'industrial'
+  | 'water'
+  | 'power'
+  | 'ports_airports'
+  | 'other';
 
 export const GROUP_LABELS: Record<string, string> = {
   key_personnel: 'Key personnel',
@@ -12,13 +21,20 @@ export const GROUP_LABELS: Record<string, string> = {
 
 export const BACKGROUND_LABELS: Record<Background, string> = {
   retired_railway: 'Retired from Indian Railways / railway PSU',
-  retired_govt: 'Retired from other Govt / PSU (NHAI, PWD, MoRTH…)',
-  private_sector: 'Private sector / consultancy',
+  retired_govt: 'Retired from other Govt / PSU (NHAI, CPWD, PWD, MoRTH…)',
+  private_sector: 'Private sector (contractor / consultancy / developer)',
 };
 
 export const SECTOR_LABELS: Record<Sector, string> = {
   railways: 'Railways',
-  highways: 'Highways',
+  metro: 'Metro & urban transit',
+  highways: 'Highways & roads',
+  buildings: 'Buildings & real estate',
+  industrial: 'Industrial & factories',
+  water: 'Water, irrigation & sewerage',
+  power: 'Power & energy',
+  ports_airports: 'Ports & airports',
+  other: 'Other construction',
 };
 export type JobStatus = 'open' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
 export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';

@@ -18,8 +18,8 @@ import {
 export const userRole = pgEnum('user_role', ['worker', 'client', 'admin']);
 // The first five groups are from the original general-labour taxonomy. They
 // stay in the enum because existing rows may reference them, but the seed now
-// deactivates every category in them — the platform recruits only for railway
-// and highway consultancy contracts (GC, PMC, PGMS, PSSA, AE/IE).
+// deactivates every category in them — the platform recruits key personnel,
+// engineers and office staff for construction and infrastructure projects.
 export const categoryGroup = pgEnum('category_group', [
   'physical_labour',
   'driver',
@@ -163,7 +163,7 @@ export const workerProfiles = pgTable('worker_profiles', {
   currency: varchar('currency', { length: 3 }).notNull().default('INR'),
   city: varchar('city', { length: 100 }),
   background: workerBackground('background'),
-  // Subset of 'railways' | 'highways' — the sectors the candidate will work in.
+  // Subset of SECTORS (auth/dto/register-worker.dto.ts) — the sectors the candidate will work in.
   sectors: jsonb('sectors').$type<string[]>().notNull().default([]),
   qualification: varchar('qualification', { length: 255 }),
   lastDesignation: varchar('last_designation', { length: 255 }),

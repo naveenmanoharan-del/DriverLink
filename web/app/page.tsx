@@ -10,8 +10,8 @@ export default function HomePage() {
       <section className="relative mt-6 h-[560px] w-full overflow-hidden sm:h-[620px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://images.unsplash.com/photo-1582217900003-2b19c0e3a7d0?w=1920&q=80"
-          alt="A train on a railway line"
+          src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&q=80"
+          alt="Engineers in hard hats on a construction site"
           // Slow drift keeps the hero alive without competing with the copy.
           className="h-full w-full animate-fade-in object-cover motion-safe:animate-[fade-in_1.2s_ease-out_both]"
         />
@@ -23,15 +23,15 @@ export default function HomePage() {
               className="max-w-2xl animate-fade-up text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl"
               style={{ '--delay': '220ms' } as React.CSSProperties}
             >
-              The right key personnel for every bid.
+              The right key personnel for every project.
             </h1>
             <p
               className="mt-4 max-w-lg animate-fade-up text-[15px] leading-relaxed text-white"
               style={{ '--delay': '340ms' } as React.CSSProperties}
             >
-              Yukti Solutions supplies experts, engineers and office staff to firms bidding on railway GC, PMC,
-              PGMS and PSSA contracts and highway Authority / Independent Engineer assignments — including
-              experienced retired railway officers.
+              Yukti Solutions supplies experts, engineers and office staff to contractors, consultants and
+              developers across the construction industry — infrastructure, buildings, industrial, water and
+              power projects — including experienced retired government and railway officers.
             </p>
             <div
               className="mt-8 flex animate-fade-up flex-wrap gap-4"
@@ -57,10 +57,11 @@ export default function HomePage() {
               CVs that meet the RFP, from people who have done the work.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-body">
-              Consultancy bids are won and lost on key personnel. We maintain a register of team leaders,
-              resident engineers, bridge, track, S&amp;T and OHE experts, and the site-office staff behind them —
-              serving and retired professionals from Indian Railways, railway PSUs, NHAI, state PWDs and the
-              private sector — with CVs ready to go into your technical proposal.
+              Construction projects and bids are won and lost on key personnel. We maintain a register of
+              project managers, resident engineers, structural, geotechnical, MEP, planning, QA/QC and safety
+              experts, and the site-office staff behind them — serving and retired professionals from
+              contractors, consultancies, Indian Railways, NHAI, CPWD, state PWDs and PSUs — with CVs ready for
+              your technical proposal or your site.
             </p>
             <Link href="/register/client" className="mt-6 inline-block">
               <Button>Source personnel for a bid</Button>
@@ -70,8 +71,8 @@ export default function HomePage() {
             <div className="group aspect-[4/3] overflow-hidden rounded-3xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1501276276428-88ec0b385919?w=1000&q=80"
-                alt="Aerial view of a highway through trees"
+                src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1000&q=80"
+                alt="Workers tying reinforcement bars on a construction site"
                 className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               />
             </div>
@@ -92,12 +93,12 @@ export default function HomePage() {
                 body: 'Qualifications, experience and last postings captured up front, so matching a CV to the RFP criteria is quick.',
               },
               {
-                title: 'Retired railway expertise',
-                body: 'Officers and SSEs retired from Indian Railways and its PSUs bring decades of P-Way, bridge, S&T and OHE experience.',
+                title: 'Retired government expertise',
+                body: 'Engineers and officers retired from Indian Railways, NHAI, CPWD, state PWDs and PSUs bring decades of field experience.',
               },
               {
-                title: 'Railways and highways',
-                body: 'One register covering railway GC / PMC / PGMS / PSSA work and highway AE / IE consultancy.',
+                title: 'Across construction',
+                body: 'One register for railways, metro, highways, buildings, industrial, water and power projects — consultancy, EPC and contracting roles alike.',
               },
             ].map((v, i) => (
               // Stagger left-to-right so the row resolves as one gesture.
@@ -127,10 +128,10 @@ export default function HomePage() {
       <section className="mx-auto max-w-5xl px-4 pb-24">
         <Reveal className="grid gap-px overflow-hidden rounded-3xl border border-line bg-line sm:grid-cols-2">
           <div className="bg-accent p-10 text-white">
-            <p className="text-sm text-white">For consultancy firms</p>
-            <h3 className="mt-2 text-2xl font-bold">Tell us the positions in your bid</h3>
+            <p className="text-sm text-white">For contractors &amp; consultants</p>
+            <h3 className="mt-2 text-2xl font-bold">Tell us the positions you need</h3>
             <p className="mt-3 text-[15px] text-white">
-              Post the role, location and remuneration. We put forward candidates who fit the RFP.
+              Post the role, location and remuneration. We put forward candidates who fit the requirement.
             </p>
             <Link href="/register/client" className="mt-6 inline-block">
               <Button variant="onAccentPanel">Hire for a contract</Button>

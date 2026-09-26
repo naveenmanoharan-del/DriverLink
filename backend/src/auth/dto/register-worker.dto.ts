@@ -16,7 +16,17 @@ import {
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
-export const SECTORS = ['railways', 'highways'] as const;
+export const SECTORS = [
+  'railways',
+  'metro',
+  'highways',
+  'buildings',
+  'industrial',
+  'water',
+  'power',
+  'ports_airports',
+  'other',
+] as const;
 export const BACKGROUNDS = [
   'retired_railway',
   'retired_govt',

@@ -14,7 +14,7 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: 'Yukti Solutions',
   description:
-    'Key personnel, engineers and office staff for railway GC, PMC, PGMS, PSSA and highway consultancy contracts — including retired railway officers.',
+    'Key personnel, engineers and office staff for construction and infrastructure projects — railways, metro, highways, buildings, industrial, water and power — including retired government and railway officers.',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

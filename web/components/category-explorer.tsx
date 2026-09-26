@@ -7,22 +7,22 @@ const CATEGORIES = [
     label: 'Key personnel',
     image: 'https://images.unsplash.com/photo-1694521787193-9293daeddbaa?w=1000&q=80',
     description:
-      'Team leaders, resident engineers, and bridge, track, highway, geotechnical, S&T, OHE, contracts and QA experts named in your technical proposal.',
+      'Team leaders, project managers, resident engineers, and structural, geotechnical, highway, track, MEP, planning, contracts, QA/QC and safety experts for your bid or project.',
   },
   {
     label: 'Engineers & technical staff',
     image: 'https://images.unsplash.com/photo-1545186070-de624ed19875?w=1000&q=80',
-    description: 'Site engineers, section engineers and inspectors, surveyors, lab technicians and CAD draughtsmen.',
+    description: 'Site engineers and supervisors, MEP engineers, section engineers and inspectors, surveyors, safety officers, lab technicians and CAD draughtsmen.',
   },
   {
     label: 'Office & support staff',
     image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1000&q=80',
-    description: 'Office managers, accountants, document controllers, HR, computer operators and stenographers for the project office.',
+    description: 'Office managers, accountants, document controllers, store keepers, HR, computer operators and stenographers for the project office.',
   },
   {
-    label: 'Retired railway officers',
+    label: 'Retired government officers',
     image: 'https://images.unsplash.com/photo-1637995735729-c43250f1ef47?w=1000&q=80',
-    description: 'Officers and SSEs / JEs retired from Indian Railways, RVNL, IRCON, RITES and DFCCIL — decades of field experience, available for consultancy roles.',
+    description: 'Engineers and officers retired from Indian Railways, NHAI, CPWD, state PWDs and PSUs such as RVNL, IRCON and RITES — decades of field experience, available for project roles.',
   },
 ];
 

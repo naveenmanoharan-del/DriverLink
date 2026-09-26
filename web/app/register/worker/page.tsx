@@ -33,7 +33,7 @@ export default function RegisterWorkerPage() {
     lastName: '',
     categoryId: '',
     background: '' as Background | '',
-    sectors: ['railways'] as Sector[],
+    sectors: [] as Sector[],
     qualification: '',
     yearsExperience: '',
     lastDesignation: '',
@@ -112,8 +112,9 @@ export default function RegisterWorkerPage() {
       <Eyebrow>Join the register</Eyebrow>
       <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink">Submit your CV</h1>
       <p className="mt-1 text-sm text-body">
-        For railway and highway consultancy assignments — GC, PMC, PGMS, PSSA, Authority / Independent Engineer.
-        Retired railway and government officers are especially welcome.
+        For construction and infrastructure projects — consultancy, EPC and contracting roles across railways,
+        metro, highways, buildings, industrial, water and power. Retired government and railway officers are
+        especially welcome.
       </p>
 
       <Card className="mt-6 p-6">
@@ -189,7 +190,7 @@ export default function RegisterWorkerPage() {
 
           <fieldset>
             <legend className="text-sm font-medium text-body">Sectors you will work in</legend>
-            <div className="mt-2 flex gap-3">
+            <div className="mt-2 flex flex-wrap gap-2">
               {(Object.keys(SECTOR_LABELS) as Sector[]).map((sector) => {
                 const on = form.sectors.includes(sector);
                 return (
@@ -243,9 +244,9 @@ export default function RegisterWorkerPage() {
                 onChange={(e) => update('lastDesignation', e.target.value)}
               />
             </Field>
-            <Field label={retired ? 'Railway zone / organisation' : 'Current / last employer'}>
+            <Field label={retired ? 'Department / organisation' : 'Current / last employer'}>
               <TextInput
-                placeholder={retired ? 'e.g. Southern Railway' : ''}
+                placeholder={retired ? 'e.g. Southern Railway, CPWD' : ''}
                 maxLength={255}
                 value={form.lastOrganisation}
                 onChange={(e) => update('lastOrganisation', e.target.value)}
