@@ -20,6 +20,39 @@ export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={inputClass} />;
 }
 
+/**
+ * A whole-number box that can only ever contain digits.
+ *
+ * `<input type="number">` is deliberately avoided: browsers let you type `e`, `E`, `+`, `-` and `.`
+ * into it, and while the field is in that invalid state `target.value` reads back as an empty
+ * string — so the box shows characters the app never receives, `maxLength` is ignored, and a stray
+ * scroll over a focused field silently changes the number. Here the value is filtered on every
+ * keystroke instead, so what is displayed and what is stored cannot drift apart.
+ */
+export function DigitsInput({
+  maxDigits,
+  value,
+  onChange,
+  ...rest
+}: { maxDigits: number; value: string; onChange: (value: string) => void } & Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  'value' | 'onChange' | 'type' | 'maxLength'
+>) {
+  return (
+    <input
+      {...rest}
+      type="text"
+      inputMode="numeric"
+      autoComplete="off"
+      maxLength={maxDigits}
+      pattern="[0-9]*"
+      value={value}
+      onChange={(e) => onChange(e.target.value.replace(/\D/g, '').slice(0, maxDigits))}
+      className={inputClass}
+    />
+  );
+}
+
 export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return <textarea {...props} className={inputClass} />;
 }

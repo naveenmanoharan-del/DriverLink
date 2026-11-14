@@ -8,22 +8,22 @@
  * These values are duplicated from the brand kit and must be kept in step with
  * web/app/brand.css (the --ys-* tokens, mapped in globals.css @theme).
  *
- * Amber is deliberately absent as a text colour on white (2.2:1): it is only
- * used for decorative marks there, and as text or focus rings on navy.
+ * Sage is deliberately absent as a text colour on soft white: it is only
+ * used for decorative marks there, and as text or focus rings on olive.
  */
 const T = {
-  ink: '#1D232B',
-  body: '#5B6470',
-  bgSoft: '#F7F8FA',
-  accent: '#13294B', // Rail Navy
-  accentDark: '#0C1B31',
-  navyTint: '#EEF0F2',
-  amber: '#E9A23B', // Signal Amber
+  ink: '#1E2318',
+  body: '#5E6553',
+  bgSoft: '#F3F2EA',
+  accent: '#2B3A1F', // Deep Olive
+  accentDark: '#1B2614',
+  navyTint: '#ECEEE6',
+  amber: '#A3B18A', // Sage
   teal: '#1e847d',
   tealDark: '#166860',
-  line: '#E3E6EA',
+  line: '#E0E3D8',
   warn: '#b3492f',
-  white: '#ffffff',
+  white: '#FAF9F3', // soft white
 };
 
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -55,7 +55,7 @@ const cases = [
   ['teal-dark (success) on white', T.tealDark, T.white, 1, false],
   ['warn (error) on white', T.warn, T.white, 1, false],
   ['footer body: white/70 on navy', T.white, T.accent, 0.7, false],
-  ['footer legal: white/50 on navy', T.white, T.accent, 0.5, false],
+  ['footer legal: white/65 on navy', T.white, T.accent, 0.65, false],
   ['footer heading: white on navy', T.white, T.accent, 1, false],
   ['hero subhead: white on ink overlay', T.white, T.ink, 1, false],
   ['panel text: white on navy', T.white, T.accent, 1, false],

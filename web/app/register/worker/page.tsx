@@ -14,7 +14,7 @@ import {
   type Category,
   type Sector,
 } from '@/lib/types';
-import { Button, Card, Eyebrow, Field, Select, TextInput } from '@/components/ui';
+import { Button, Card, DigitsInput, Eyebrow, Field, Select, TextInput } from '@/components/ui';
 import { ResumeInput, validateResume } from '@/components/resume-input';
 
 export default function RegisterWorkerPage() {
@@ -72,6 +72,18 @@ export default function RegisterWorkerPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+
+    // The numeric boxes only accept digits, so these guard the ranges that digits alone can't:
+    // a spoken-for upper bound, and a retirement year that has to be a real one.
+    const years = Number(form.yearsExperience);
+    if (!form.yearsExperience || years > 70) return setError('Total experience must be between 0 and 70 years.');
+
+    const thisYear = new Date().getFullYear();
+    if (retired && form.retirementYear) {
+      const year = Number(form.retirementYear);
+      if (year < 1970 || year > thisYear) return setError(`Year of retirement must be between 1970 and ${thisYear}.`);
+    }
+
     if (form.sectors.length === 0) return setError('Choose at least one sector.');
     if (!resume) return setError('Please attach your resume.');
     const resumeError = validateResume(resume);
@@ -229,13 +241,11 @@ export default function RegisterWorkerPage() {
               />
             </Field>
             <Field label="Total experience (years)">
-              <TextInput
-                type="number"
+              <DigitsInput
                 required
-                min={0}
-                max={70}
+                maxDigits={2}
                 value={form.yearsExperience}
-                onChange={(e) => update('yearsExperience', e.target.value.slice(0, 2))}
+                onChange={(v) => update('yearsExperience', v)}
               />
             </Field>
           </div>
@@ -264,22 +274,19 @@ export default function RegisterWorkerPage() {
           <div className="grid grid-cols-2 gap-4">
             {retired && (
               <Field label="Year of retirement">
-                <TextInput
-                  type="number"
-                  min={1970}
-                  max={new Date().getFullYear()}
+                <DigitsInput
+                  maxDigits={4}
                   value={form.retirementYear}
-                  onChange={(e) => update('retirementYear', e.target.value.slice(0, 4))}
+                  onChange={(v) => update('retirementYear', v)}
                 />
               </Field>
             )}
             <Field label="Expected salary (₹ / month)">
-              <TextInput
-                type="number"
+              <DigitsInput
                 required
-                min={0}
+                maxDigits={9}
                 value={form.minRate}
-                onChange={(e) => update('minRate', e.target.value.slice(0, 12))}
+                onChange={(v) => update('minRate', v)}
               />
             </Field>
           </div>

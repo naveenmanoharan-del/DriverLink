@@ -3,22 +3,25 @@
    variables rather than hard-coding hex values. Rules: README-FOR-CLAUDE-CODE.md */
 
 :root {
-  /* Core brand colours */
-  --ys-navy: #13294B;        /* primary: headings, links, primary buttons, header/footer backgrounds */
-  --ys-amber: #E9A23B;       /* accent: highlights, rules, icons; amber buttons take navy text */
+  /* Core brand colours — soft white / sage green / deep olive.
+     The --ys-navy / --ys-amber names are kept because the whole site maps its roles onto
+     them; only the values change, so renaming would touch every component for nothing. */
+  --ys-navy: #2B3A1F;        /* primary: headings, links, primary buttons, header/footer backgrounds */
+  --ys-amber: #A3B18A;       /* accent: highlights, rules, icons. Sage — decorative on soft
+                                white, and text/focus rings on olive, where it reads 5.4:1 */
 
   /* Supporting shades */
-  --ys-navy-dark: #0C1B31;   /* hover/active state for navy buttons and links */
-  --ys-navy-tint: #EEF0F2;   /* light section background */
-  --ys-amber-dark: #CD8F34;  /* hover/active state for amber buttons (keep navy text) */
-  --ys-amber-tint: #FCF2E4;  /* soft highlight background */
+  --ys-navy-dark: #1B2614;   /* hover/active state for primary buttons and links */
+  --ys-navy-tint: #ECEEE6;   /* light section background */
+  --ys-amber-dark: #8A9A6F;  /* hover/active state for accent buttons */
+  --ys-amber-tint: #EDF1E4;  /* soft highlight background */
 
-  /* Neutrals */
-  --ys-ink: #1D232B;         /* body text */
-  --ys-muted: #5B6470;       /* secondary text and captions (6.0:1 on white) */
-  --ys-border: #E3E6EA;      /* dividers and card borders (decorative only) */
-  --ys-surface: #F7F8FA;     /* alternate section background */
-  --ys-white: #FFFFFF;
+  /* Neutrals, warmed toward the olive family */
+  --ys-ink: #1E2318;         /* body text */
+  --ys-muted: #5E6553;       /* secondary text and captions */
+  --ys-border: #E0E3D8;      /* dividers and card borders (decorative only) */
+  --ys-surface: #F3F2EA;     /* alternate section background */
+  --ys-white: #FAF9F3;       /* soft white, not pure white */
 
   /* Type */
   --ys-font: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;

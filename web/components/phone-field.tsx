@@ -44,7 +44,6 @@ export function PhoneField({
           maxLength={PHONE_DIGITS}
           pattern={`[0-9]{${PHONE_DIGITS}}`}
           title={`Enter a ${PHONE_DIGITS}-digit phone number`}
-          placeholder="9000000000"
           className={className}
           value={number}
           onChange={(e) => onChange(joinPhone(code, e.target.value))}
