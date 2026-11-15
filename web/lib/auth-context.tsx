@@ -25,30 +25,49 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 const STORAGE_KEY = 'manpower_session';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Session and loading move together on every transition, so they are one
+  // state value: restoring from storage is then a single update rather than
+  // two renders where the session is known but the app still says "loading".
+  const [{ session, loading }, setState] = useState<{
+    session: Session | null;
+    loading: boolean;
+  }>({ session: null, loading: true });
+
+  // The refresher below runs outside React's render cycle, so it reads the
+  // session from a ref to avoid capturing a stale copy. The ref is written
+  // alongside every state change (never during render, which is not safe
+  // under concurrent rendering — React may render twice and discard one).
+  const sessionRef = useRef<Session | null>(null);
 
   useEffect(() => {
+    let restored: Session | null = null;
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
-        setSession(JSON.parse(raw));
+        restored = JSON.parse(raw) as Session;
       } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
     }
-    setLoading(false);
+    sessionRef.current = restored;
+    // localStorage does not exist until the component is mounted in a browser,
+    // so the stored session cannot be read during render without the server
+    // and client producing different markup. One update on mount is the price
+    // of that, and it is why this rule is suppressed on this line alone.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setState({ session: restored, loading: false });
   }, []);
-
-  // The refresher below runs outside React's render cycle, so it reads the
-  // session from a ref to avoid capturing a stale copy.
-  const sessionRef = useRef<Session | null>(null);
-  sessionRef.current = session;
 
   function persist(next: Session) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     sessionRef.current = next;
-    setSession(next);
+    setState({ session: next, loading: false });
+  }
+
+  function clearSession() {
+    localStorage.removeItem(STORAGE_KEY);
+    sessionRef.current = null;
+    setState({ session: null, loading: false });
   }
 
   useEffect(() => {
@@ -65,9 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {
         // Refresh token is expired or revoked — drop the session so the user
         // is sent back to log in rather than looping on failed requests.
-        localStorage.removeItem(STORAGE_KEY);
-        sessionRef.current = null;
-        setSession(null);
+        clearSession();
         return null;
       }
     });
@@ -111,9 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const refreshToken = sessionRef.current?.refreshToken;
 
     // Clear locally first so the UI never appears stuck behind a network call.
-    localStorage.removeItem(STORAGE_KEY);
-    sessionRef.current = null;
-    setSession(null);
+    clearSession();
 
     // Then revoke server-side, so the refresh token can't be reused for the
     // rest of its 7-day life. Fire-and-forget: a failure here must not block

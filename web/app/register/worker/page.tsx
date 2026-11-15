@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { PhoneField } from '@/components/phone-field';
-import { apiFetch } from '@/lib/api';
 import {
   BACKGROUND_LABELS,
   GROUP_LABELS,
@@ -15,12 +14,13 @@ import {
   type Sector,
 } from '@/lib/types';
 import { Button, Card, DigitsInput, Eyebrow, Field, Select, TextInput } from '@/components/ui';
+import { LoadError } from '@/components/load-error';
+import { useCategories } from '@/lib/use-categories';
 import { ResumeInput, validateResume } from '@/components/resume-input';
 
 export default function RegisterWorkerPage() {
   const { registerWorker } = useAuth();
   const router = useRouter();
-  const [categories, setCategories] = useState<Category[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [resume, setResume] = useState<File | null>(null);
@@ -43,9 +43,7 @@ export default function RegisterWorkerPage() {
     city: '',
   });
 
-  useEffect(() => {
-    apiFetch<Category[]>('/v1/categories').then(setCategories).catch(() => setCategories([]));
-  }, []);
+  const { categories, failed: categoriesFailed, retry: retryCategories } = useCategories();
 
   const grouped = categories.reduce<Record<string, Category[]>>((acc, c) => {
     (acc[c.group] ??= []).push(c);
@@ -168,6 +166,9 @@ export default function RegisterWorkerPage() {
 
           <SectionTitle>Your experience</SectionTitle>
           <Field label="Position you are applying for">
+            {categoriesFailed ? (
+              <LoadError what="Positions" onRetry={retryCategories} />
+            ) : (
             <Select required value={form.categoryId} onChange={(e) => update('categoryId', e.target.value)}>
               <option value="" disabled>
                 Select a position
@@ -182,6 +183,7 @@ export default function RegisterWorkerPage() {
                 </optgroup>
               ))}
             </Select>
+            )}
           </Field>
 
           <Field label="Background">

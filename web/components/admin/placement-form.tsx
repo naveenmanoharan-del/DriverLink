@@ -1,5 +1,7 @@
 'use client';
 
+import { blockNonNumericKeys } from '@/components/ui';
+
 import { useEffect, useState, type FormEvent } from 'react';
 import { SmallButton } from './admin-shell';
 import {
@@ -229,6 +231,7 @@ export function PlacementForm({
           type="number"
           min={0}
           step="0.01"
+          onKeyDown={blockNonNumericKeys}
           className={inputCls}
           value={form.monthlyRemuneration}
           onChange={(e) => update('monthlyRemuneration', e.target.value)}

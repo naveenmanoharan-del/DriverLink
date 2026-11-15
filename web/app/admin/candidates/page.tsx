@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { Suspense, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AdminShell, ErrorNote, Pager, SmallButton } from '@/components/admin/admin-shell';
-import { apiFetch } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import {
   PIPELINE_LABELS,
@@ -17,6 +16,8 @@ import {
 } from '@/lib/admin';
 import { BACKGROUND_LABELS, GROUP_LABELS, SECTOR_LABELS, type Category } from '@/lib/types';
 import { StatusPill } from '@/components/ui';
+import { LoadError } from '@/components/load-error';
+import { useCategories } from '@/lib/use-categories';
 
 /** Every filter lives in the URL, so a filtered view can be bookmarked or shared. */
 const FILTER_KEYS = [
@@ -42,7 +43,6 @@ function Candidates() {
   const router = useRouter();
   const pathname = usePathname();
   const { session } = useAuth();
-  const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState(params.get('q') ?? '');
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -58,9 +58,7 @@ function Candidates() {
   apiQuery.set('pageSize', '25');
   const { data, error, loading, refreshing } = useAdminQuery<Paged<CandidateRow>>(`/v1/admin/candidates?${apiQuery}`);
 
-  useEffect(() => {
-    apiFetch<Category[]>('/v1/categories').then(setCategories).catch(() => setCategories([]));
-  }, []);
+  const { categories, failed: categoriesFailed, retry: retryCategories } = useCategories();
 
   function setParam(key: string, value: string) {
     const next = new URLSearchParams(params.toString());
@@ -139,6 +137,7 @@ function Candidates() {
               </optgroup>
             ))}
           </select>
+          {categoriesFailed && <LoadError what="Positions" onRetry={retryCategories} />}
           <select aria-label="Background" className={selectCls} value={params.get('background') ?? ''} onChange={(e) => setParam('background', e.target.value)}>
             <option value="">Any background</option>
             {Object.entries(BACKGROUND_LABELS).map(([k, v]) => (
@@ -187,24 +186,24 @@ function Candidates() {
           <span>Experience</span>
           <input
             aria-label="Minimum years of experience"
-            type="number"
-            min={0}
-            max={70}
+            type="text"
+            inputMode="numeric"
+            maxLength={2}
             placeholder="min"
             className={`${selectCls} w-20`}
             defaultValue={params.get('minExperience') ?? ''}
-            onBlur={(e) => setParam('minExperience', e.target.value)}
+            onBlur={(e) => setParam('minExperience', e.target.value.replace(/\D/g, '').slice(0, 2))}
           />
           <span>to</span>
           <input
             aria-label="Maximum years of experience"
-            type="number"
-            min={0}
-            max={70}
+            type="text"
+            inputMode="numeric"
+            maxLength={2}
             placeholder="max"
             className={`${selectCls} w-20`}
             defaultValue={params.get('maxExperience') ?? ''}
-            onBlur={(e) => setParam('maxExperience', e.target.value)}
+            onBlur={(e) => setParam('maxExperience', e.target.value.replace(/\D/g, '').slice(0, 2))}
           />
           <span>Registered</span>
           <input

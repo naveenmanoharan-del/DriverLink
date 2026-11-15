@@ -53,6 +53,16 @@ export function DigitsInput({
   );
 }
 
+/**
+ * For the few number boxes that must keep decimals. Browsers let `e`, `E`, `+`
+ * and `-` be typed into `<input type="number">`, and while one is present the
+ * value reads back as an empty string — so the field looks filled while the app
+ * sees nothing. Blocking the keys is the smallest fix that keeps decimals.
+ */
+export function blockNonNumericKeys(e: React.KeyboardEvent<HTMLInputElement>) {
+  if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+}
+
 export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return <textarea {...props} className={inputClass} />;
 }

@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { RequireRole } from '@/components/require-role';
 import { useAuth } from '@/lib/auth-context';
 import { apiFetch } from '@/lib/api';
 import { GROUP_LABELS, type Category, type Job, type RateUnit } from '@/lib/types';
-import { Button, Card, Eyebrow, Field, Select, Textarea, TextInput } from '@/components/ui';
+import { Button, Card, DigitsInput, Eyebrow, Field, Select, Textarea, TextInput } from '@/components/ui';
+import { LoadError } from '@/components/load-error';
+import { useCategories } from '@/lib/use-categories';
 
 export default function NewJobPage() {
   return (
@@ -19,7 +21,6 @@ export default function NewJobPage() {
 function NewJobForm() {
   const { session } = useAuth();
   const router = useRouter();
-  const [categories, setCategories] = useState<Category[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -34,9 +35,7 @@ function NewJobForm() {
     startsAt: '',
   });
 
-  useEffect(() => {
-    apiFetch<Category[]>('/v1/categories').then(setCategories).catch(() => setCategories([]));
-  }, []);
+  const { categories, failed: categoriesFailed, retry: retryCategories } = useCategories();
 
   const grouped = categories.reduce<Record<string, Category[]>>((acc, c) => {
     (acc[c.group] ??= []).push(c);
@@ -51,6 +50,12 @@ function NewJobForm() {
     e.preventDefault();
     if (!session) return;
     setError(null);
+
+    // The boxes accept digits only; this is the range digits alone can't express.
+    if (Number(form.workersRequired) < 1) {
+      return setError('Positions required must be at least 1.');
+    }
+
     setSubmitting(true);
     try {
       const job = await apiFetch<Job>('/v1/jobs', {
@@ -87,6 +92,9 @@ function NewJobForm() {
           </Field>
 
           <Field label="Position">
+            {categoriesFailed ? (
+              <LoadError what="Positions" onRetry={retryCategories} />
+            ) : (
             <Select required value={form.categoryId} onChange={(e) => update('categoryId', e.target.value)}>
               <option value="" disabled>
                 Select a category
@@ -101,6 +109,7 @@ function NewJobForm() {
                 </optgroup>
               ))}
             </Select>
+            )}
           </Field>
 
           <Field label="Location">
@@ -113,11 +122,11 @@ function NewJobForm() {
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="Positions required">
-              <TextInput
-                type="number"
-                min={1}
+              <DigitsInput
+                required
+                maxDigits={4}
                 value={form.workersRequired}
-                onChange={(e) => update('workersRequired', e.target.value.slice(0, 4))}
+                onChange={(v) => update('workersRequired', v)}
               />
             </Field>
             <Field label="Starts at">
@@ -132,12 +141,11 @@ function NewJobForm() {
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="Offered rate (INR)">
-              <TextInput
-                type="number"
+              <DigitsInput
                 required
-                min={0}
+                maxDigits={9}
                 value={form.offeredRate}
-                onChange={(e) => update('offeredRate', e.target.value.slice(0, 12))}
+                onChange={(v) => update('offeredRate', v)}
               />
             </Field>
             <Field label="Per">

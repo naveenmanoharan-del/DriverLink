@@ -19,24 +19,37 @@ export default function ClientJobsPage() {
 
 function MyJobs() {
   const { session } = useAuth();
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // One state value set only from the request's own callbacks, so the effect
+  // below starts the fetch without setting state synchronously as it runs.
+  const [{ jobs, loading, error }, setState] = useState<{
+    jobs: Job[];
+    loading: boolean;
+    error: string | null;
+  }>({ jobs: [], loading: true, error: null });
 
-  const load = useCallback(async () => {
+  // Written as a promise chain rather than async/await on purpose: state is
+  // then only ever set from a callback, which is what makes it safe to call
+  // straight from the effect below.
+  const load = useCallback(() => {
     if (!session) return;
-    setLoading(true);
-    setError(null);
-    try {
-      setJobs(await apiFetch<Job[]>('/v1/jobs/mine', { token: session.accessToken }));
-    } catch (err) {
-      setError(messageFor(err, 'Could not load your job postings.'));
-    } finally {
-      setLoading(false);
-    }
+    apiFetch<Job[]>('/v1/jobs/mine', { token: session.accessToken })
+      .then((list) => setState({ jobs: list, loading: false, error: null }))
+      .catch((err: unknown) =>
+        setState({
+          jobs: [],
+          loading: false,
+          error: messageFor(err, 'Could not load your job postings.'),
+        }),
+      );
   }, [session]);
 
   useEffect(() => {
+    load();
+  }, [load]);
+
+  // Retrying is user-triggered, so it can show the loading state immediately.
+  const retry = useCallback(() => {
+    setState((s) => ({ ...s, loading: true, error: null }));
     load();
   }, [load]);
 
@@ -59,7 +72,7 @@ function MyJobs() {
         error={error}
         isEmpty={jobs.length === 0}
         emptyMessage="You haven't posted any jobs yet."
-        onRetry={load}
+        onRetry={retry}
       />
 
       {!loading && !error && jobs.length > 0 && (
