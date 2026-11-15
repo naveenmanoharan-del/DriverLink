@@ -7,15 +7,12 @@
   --color-ink: var(--ys-ink);
   --color-body: var(--ys-muted);
   --color-bg-soft: var(--ys-surface);
-  /* Tailwind's own `white` is pure #fff; point it at the brand's soft white so cards
-     and text on dark panels sit in the same warm family as everything else. */
-  --color-white: var(--ys-white);
-  /* Primary: Deep Olive. Soft white text on it is 12.9:1. */
+  /* Primary: Rail Navy. White text on it is 14.5:1. */
   --color-accent: var(--ys-navy);
   --color-accent-dark: var(--ys-navy-dark);
   --color-navy-tint: var(--ys-navy-tint);
-  /* Sage is the sparing accent: decorative marks on soft white, or text/icons
-     on olive. Never soft-white text on sage or sage text on soft white. */
+  /* Signal Amber is the sparing accent: decorative marks on white, or text/icons
+     on navy. Never white text on amber or amber text on white (2.2:1). */
   --color-amber: var(--ys-amber);
   --color-amber-dark: var(--ys-amber-dark);
   --color-amber-tint: var(--ys-amber-tint);
