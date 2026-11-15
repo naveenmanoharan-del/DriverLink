@@ -120,7 +120,7 @@ function NewJobForm() {
             <Textarea maxLength={5000} value={form.description} onChange={(e) => update('description', e.target.value)} rows={3} />
           </Field>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Positions required">
               <DigitsInput
                 required
@@ -139,7 +139,7 @@ function NewJobForm() {
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Offered rate (INR)">
               <DigitsInput
                 required

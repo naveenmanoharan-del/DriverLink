@@ -131,7 +131,7 @@ export default function RegisterWorkerPage() {
       <Card className="mt-6 p-6">
         <form onSubmit={handleSubmit} className="space-y-5">
           <SectionTitle>About you</SectionTitle>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="First name">
               <TextInput required maxLength={100} value={form.firstName} onChange={(e) => update('firstName', e.target.value)} />
             </Field>
@@ -232,7 +232,7 @@ export default function RegisterWorkerPage() {
             </div>
           </fieldset>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Highest qualification">
               <TextInput
                 required
@@ -273,7 +273,7 @@ export default function RegisterWorkerPage() {
           </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             {retired && (
               <Field label="Year of retirement">
                 <DigitsInput
